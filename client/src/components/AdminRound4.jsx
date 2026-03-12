@@ -61,7 +61,7 @@ export default function AdminRound4({ gameState, updateState }) {
 
     return (
         <div className="mt-8 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-            <h2 className="text-2xl font-bold text-purple-400 border-b border-slate-700 pb-4 mb-6">最终决选：十强名额补位</h2>
+            <h2 className="text-2xl font-bold text-teal-400 border-b border-slate-700 pb-4 mb-6">最终决选：十强名额补位</h2>
 
             <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-1 border-r border-slate-700 pr-6">
@@ -70,7 +70,7 @@ export default function AdminRound4({ gameState, updateState }) {
                         <div className="text-4xl font-black text-emerald-400 mb-4">{advancedPlayers.length} 人</div>
 
                         <div className="text-slate-400 text-sm mb-2">剩余待补齐席位</div>
-                        <div className="text-5xl font-black text-amber-400">{remainingSpots} 个</div>
+                        <div className="text-5xl font-black text-teal-400">{remainingSpots} 个</div>
                     </div>
 
                     <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl">
@@ -94,7 +94,7 @@ export default function AdminRound4({ gameState, updateState }) {
                     {!gameState.resurrectionCalculated ? (
                         <button
                             onClick={handleCalculateResurrection}
-                            className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-black text-2xl py-6 px-16 rounded-2xl shadow-[0_0_30px_rgba(147,51,234,0.6)] hover:scale-[1.05] transition-transform"
+                            className="bg-teal-700 hover:bg-teal-600 text-white font-black text-2xl py-6 px-16 rounded-2xl shadow-lg hover:scale-[1.02] transition-transform"
                         >
                             启动席位自动推演并在大屏公布
                         </button>

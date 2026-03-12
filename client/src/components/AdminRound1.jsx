@@ -6,6 +6,7 @@ export default function AdminRound1({ gameState, updateState }) {
     const [judgeScoreInput, setJudgeScoreInput] = useState("");
     const [publicScoreInput, setPublicScoreInput] = useState("");
     const [history, setHistory] = useState([]); // Undo history
+    const [adminGroup, setAdminGroup] = useState(1);
 
     const handleSelect = (id) => {
         setSelectedPlayerId(id);
@@ -54,8 +55,8 @@ export default function AdminRound1({ gameState, updateState }) {
     return (
         <div className="mt-8 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
             <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                <h2 className="text-2xl font-bold text-blue-400 flex items-center">
-                    <span className="bg-blue-600 text-white w-8 h-8 rounded justify-center items-center flex mr-3 text-sm">1</span>
+                <h2 className="text-2xl font-bold text-teal-400 flex items-center">
+                    <span className="bg-teal-600 text-white w-8 h-8 rounded justify-center items-center flex mr-3 text-sm">1</span>
                     第一轮管理：30进18成绩录入
                 </h2>
                 <button
@@ -67,19 +68,48 @@ export default function AdminRound1({ gameState, updateState }) {
                 </button>
             </div>
 
+            {/* 组别控制和推流操作 */}
+            <div className="flex flex-col md:flex-row justify-between items-center bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
+                <div className="flex space-x-2 mb-4 md:mb-0">
+                    {[1, 2, 3, 4, 5, 6].map(g => (
+                        <button
+                            key={g}
+                            onClick={() => setAdminGroup(g)}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${adminGroup === g ? 'bg-teal-600 text-white shadow-[0_0_10px_rgba(13,148,136,0.6)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                        >
+                            第 {g} 组
+                        </button>
+                    ))}
+                </div>
+                <div className="flex space-x-4">
+                    <button
+                        onClick={() => updateState({ ...gameState, currentGroup: adminGroup, round1Mode: 'group' })}
+                        className="bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/50 text-white px-6 py-2 rounded-lg font-bold shadow-md transition-colors flex items-center"
+                    >
+                        📺 投屏展示【第 {adminGroup} 组】
+                    </button>
+                    <button
+                        onClick={() => updateState({ ...gameState, round1Mode: 'full' })}
+                        className="bg-teal-700 hover:bg-teal-600 border border-teal-500/50 text-white px-6 py-2 rounded-lg font-bold shadow-md transition-colors flex items-center"
+                    >
+                        🏆 投屏展示【当前完整排名】
+                    </button>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* 左侧：选手列表 */}
                 <div className="col-span-2">
-                    <h3 className="text-lg mb-4 text-slate-300 font-bold border-l-4 border-slate-500 pl-3">选手库 ({gameState.players.length}人)</h3>
-                    <div className="grid grid-cols-4 xl:grid-cols-5 gap-3">
-                        {gameState.players.map(p => (
+                    <h3 className="text-lg mb-4 text-slate-300 font-bold border-l-4 border-slate-500 pl-3">第 {adminGroup} 组 选手</h3>
+                    <div className="grid grid-cols-4 xl:grid-cols-3 gap-4">
+                        {gameState.players.filter(p => (p.group || 1) === adminGroup).map(p => (
                             <button
                                 key={p.id}
                                 onClick={() => handleSelect(p.id)}
-                                className={`py-3 px-2 rounded-lg transition-all border ${selectedPlayerId === p.id ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.6)] border-blue-400 scale-105' : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'}`}
+                                className={`py-3 px-2 rounded-lg transition-all border ${selectedPlayerId === p.id ? 'bg-teal-700 text-white shadow-md border-teal-400 scale-105' : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'}`}
                             >
                                 <div className="font-bold truncate">{p.name}</div>
-                                <div className={`text-xs mt-1 font-mono flex flex-col items-center ${p.score > 0 ? 'text-green-300' : 'text-slate-500'}`}>
+                                <div className={`text-xs mt-1 font-mono flex flex-col items-center ${p.score > 0 ? 'text-emerald-300' : 'text-slate-500'}`}>
                                     {p.score > 0 ? (
                                         <>
                                             <span className="text-sm font-bold">{parseFloat(p.score).toFixed(2)}分</span>
@@ -93,13 +123,13 @@ export default function AdminRound1({ gameState, updateState }) {
                 </div>
 
                 {/* 右侧：打分操作 */}
-                <div className="col-span-1 bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl h-fit sticky top-6">
-                    <h3 className="text-lg mb-6 text-blue-300 text-center font-bold tracking-widest bg-blue-900/30 py-2 rounded">打分面板</h3>
+                <div className="col-span-1 bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-xl h-fit sticky top-6">
+                    <h3 className="text-lg mb-6 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-2 rounded">打分面板</h3>
                     {selectedPlayer ? (
                         <div className="flex flex-col items-center">
-                            <img src={getFullAvatarUrl(selectedPlayer.avatar)} alt="avatar" className="w-28 h-28 rounded-full mb-4 border-4 border-blue-500 shadow-xl object-cover" />
-                            <h4 className="text-3xl font-black mb-1">{selectedPlayer.name}</h4>
-                            <div className="text-sm text-slate-400 mb-2">当前得分: {selectedPlayer.score > 0 ? selectedPlayer.score.toFixed(2) : '暂无'}</div>
+                            <img src={getFullAvatarUrl(selectedPlayer.avatar)} alt="avatar" className="w-28 h-28 rounded-full mb-4 border-4 border-teal-600 shadow-md object-cover" />
+                            <h4 className="text-3xl font-black mb-1 text-white">{selectedPlayer.name}</h4>
+                            <div className="text-sm text-emerald-400 mb-2 font-bold">当前得分: {selectedPlayer.score > 0 ? selectedPlayer.score.toFixed(2) : '暂无'}</div>
                             {selectedPlayer.score > 0 && (
                                 <div className="text-xs text-slate-500 mb-6 flex space-x-4">
                                     <span>专业评委: {selectedPlayer.judgeScore} (75%)</span>
@@ -116,7 +146,7 @@ export default function AdminRound1({ gameState, updateState }) {
                                             step="0.01"
                                             value={judgeScoreInput}
                                             onChange={e => setJudgeScoreInput(e.target.value)}
-                                            className="w-full bg-slate-800 border-2 border-slate-600 rounded-xl py-3 pl-24 pr-4 border-l-8 border-l-blue-500 text-2xl font-black text-right text-blue-400 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
+                                            className="w-full bg-slate-800 border-2 border-slate-600 rounded-xl py-3 pl-24 pr-4 border-l-8 border-l-teal-600 text-2xl font-black text-right text-teal-300 focus:outline-none focus:border-teal-500 transition-colors shadow-inner"
                                             placeholder="0 - 100"
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') document.getElementById('publicScoreInput')?.focus();
@@ -141,7 +171,7 @@ export default function AdminRound1({ gameState, updateState }) {
                                 </div>
                                 <button
                                     onClick={handleSubmitScore}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98] text-xl tracking-wider uppercase mt-2"
+                                    className="w-full bg-teal-700 hover:bg-teal-600 border border-teal-500 text-white font-bold py-4 rounded-xl shadow-md transition-all active:scale-[0.98] text-xl tracking-wider uppercase mt-2"
                                 >
                                     确认提交
                                 </button>

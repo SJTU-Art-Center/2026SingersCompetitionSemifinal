@@ -23,10 +23,10 @@ export default function DemonKing({ gameState }) {
                 {isSuccess && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 0.6, scale: 2 }}
+                        animate={{ opacity: 0.2, scale: 2 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1.5 }}
-                        className="absolute inset-0 bg-yellow-500 rounded-full blur-[200px] pointer-events-none -z-10"
+                        className="absolute inset-0 bg-emerald-500 rounded-full blur-[100px] pointer-events-none -z-10"
                     />
                 )}
             </AnimatePresence>
@@ -34,7 +34,7 @@ export default function DemonKing({ gameState }) {
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-6xl font-black mb-16 text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-rose-700 tracking-[0.5em] italic"
+                className="text-6xl font-black mb-16 text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.5em] italic"
             >
                 大魔王降临
             </motion.h2>
@@ -43,20 +43,20 @@ export default function DemonKing({ gameState }) {
                 <motion.div
                     animate={{ scale: isSuccess ? 1.05 : 1, y: isSuccess ? -20 : (isFailed ? 20 : 0) }}
                     transition={{ type: 'spring' }}
-                    className={`bg-[var(--color-card-bg)] border-4 rounded-[40px] p-12 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-amber-400 shadow-[0_0_80px_rgba(251,191,36,0.6)]' : (isFailed ? 'border-slate-600 grayscale brightness-75' : 'border-red-500 shadow-[0_0_40px_rgba(225,29,72,0.4)]')}`}
+                    className={`bg-[var(--color-card-bg)] border-4 rounded-[40px] p-12 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-emerald-400 shadow-[0_4px_30px_rgba(16,185,129,0.4)]' : (isFailed ? 'border-slate-600 grayscale brightness-75' : 'border-teal-500 shadow-lg')}`}
                 >
-                    <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-64 h-64 rounded-full border-[8px] object-cover mt-4 mb-8 ${isSuccess ? 'border-amber-400' : 'border-red-500'}`} />
+                    <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-64 h-64 rounded-full border-[8px] object-cover mt-4 mb-8 ${isSuccess ? 'border-emerald-400' : 'border-teal-500'}`} />
                     <h3 className="text-6xl font-black tracking-widest">{dk.name}</h3>
 
                     <div className="w-full mt-16 px-12 relative flex flex-col items-center">
                         {/* 目标均分指示线 */}
                         <div className="absolute top-0 right-16 flex flex-col items-end">
-                            <div className="text-rose-400 font-bold text-2xl mb-2 flex items-center">
+                            <div className="text-teal-400 font-bold text-2xl mb-2 flex items-center">
                                 <span className="mr-2">🏆 及格线 (16人均分)</span>
                                 <span className="font-mono text-3xl">{targetScore.toFixed(3)}</span>
                             </div>
-                            <div className="w-[800px] h-[3px] bg-red-500 relative">
-                                <div className="absolute top-[-5px] right-0 w-3 h-3 bg-red-400 rounded-full shadow-[0_0_10px_red]"></div>
+                            <div className="w-[800px] h-[3px] bg-teal-500 relative">
+                                <div className="absolute top-[-5px] right-0 w-3 h-3 bg-teal-400 rounded-full shadow-md"></div>
                             </div>
                         </div>
 
@@ -77,7 +77,7 @@ export default function DemonKing({ gameState }) {
                                     initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ delay: 1.5, type: 'spring' }}
-                                    className={`w-[80%] mt-12 py-6 text-center text-5xl font-black tracking-widest text-white rounded-2xl shadow-2xl border-4 ${isSuccess ? 'bg-gradient-to-r from-amber-500 to-yellow-600 border-amber-300 shadow-[0_0_40px_rgba(251,191,36,0.8)]' : 'bg-slate-700 border-slate-500 text-slate-300'}`}
+                                    className={`w-[80%] mt-12 py-6 text-center text-5xl font-black tracking-widest text-white rounded-2xl shadow-lg border-4 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-slate-300'}`}
                                 >
                                     {isSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
                                 </motion.div>
@@ -117,9 +117,9 @@ function AnimatedScore({ value, target, isSuccess }) {
 
             setDisplayValue(current);
 
-            // 当突破红线瞬间，变色为金色
+            // 当突破红线瞬间，绿色
             if (current >= target) {
-                setColorClass("from-amber-200 to-yellow-500");
+                setColorClass("from-teal-200 to-emerald-400");
             }
 
             if (progress < 1) {

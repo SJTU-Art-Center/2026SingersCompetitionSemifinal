@@ -54,11 +54,15 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 function initData() {
   if (!fs.existsSync(DATA_FILE)) {
     const defaultData = {
-      round: 1, // 当前比赛轮次 (1: 30进18, 2: 16人PK, 3: 大魔王返场, 4: 终极补位)
+      adminRound: 0, // 后台当前比赛轮次 (0: 赛前设置, 1: 30进18, 1.5: 挑选对手, 2: 16人PK, 3: 大魔王返场, 4: 终极补位)
+      screenRound: 0, // 大屏当前比赛轮次
+      currentGroup: 1, // 第一轮当前展示/打分的组别
+      pickingChallengerId: null, // 正在挑选对手的挑战者ID
       players: Array.from({ length: 30 }).map((_, i) => ({
         id: i + 1,
         name: `选手 ${i + 1}`,
         avatar: `https://i.pravatar.cc/150?u=${i + 1}`, // 随机头像
+        group: Math.floor(i / 5) + 1, // 1~6组，每组5人
         score: 0,
         status: 'default', // default: 默认, top2: 大魔王, top3_10: 擂主, top11_18: 挑战者, eliminated: 淘汰, pending: 待定, advanced: 晋级, resurrected: 复活
         pkAgainst: null, // PK对手ID

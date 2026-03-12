@@ -34,6 +34,7 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
 export default function PlayerManager({ gameState, updateState }) {
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
+    const [editGroup, setEditGroup] = useState(1);
     const [editAvatar, setEditAvatar] = useState("");
 
     // Image Upload and Cropping State
@@ -47,6 +48,7 @@ export default function PlayerManager({ gameState, updateState }) {
     const handleEdit = (p) => {
         setEditingId(p.id);
         setEditName(p.name);
+        setEditGroup(p.group || 1);
         setEditAvatar(p.avatar);
         setImageSrc(null); // Reset cropper state when editing new player
     };
@@ -100,7 +102,7 @@ export default function PlayerManager({ gameState, updateState }) {
     const handleSave = () => {
         const newPlayers = gameState.players.map(p => {
             if (p.id === editingId) {
-                return { ...p, name: editName, avatar: editAvatar };
+                return { ...p, name: editName, group: parseInt(editGroup), avatar: editAvatar };
             }
             return p;
         });
@@ -117,7 +119,10 @@ export default function PlayerManager({ gameState, updateState }) {
     const handleResetAll = () => {
         if (window.confirm("🔴 警告：即将清空整场比赛所有的分数、状态、对阵和对战记录，完全恢复为赛前初始模式！且该操作不可撤销！确定要继续吗？")) {
             const defaultData = {
-                round: 1,
+                adminRound: 0,
+                screenRound: 0,
+                currentGroup: 1,
+                pickingChallengerId: null,
                 players: gameState.players.map(p => ({
                     ...p,
                     score: 0,
@@ -157,6 +162,7 @@ export default function PlayerManager({ gameState, updateState }) {
                         {gameState.players.map(p => (
                             <div key={p.id} className="bg-slate-900 border border-slate-700 rounded-lg p-3 flex flex-col items-center relative">
                                 <img src={getFullAvatarUrl(p.avatar)} alt="avatar" className="w-[84px] h-[84px] rounded-full mb-3 object-cover border-2 border-slate-600 shadow-lg" />
+                                <div className="absolute top-1 right-1 bg-slate-800 border border-slate-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold text-teal-400 opacity-80 z-10">{p.group || 1}</div>
                                 <div className="text-sm font-bold text-slate-300 truncate w-full text-center pb-2 border-b border-slate-700/50 mb-2">{p.name}</div>
                                 <button
                                     onClick={() => handleEdit(p)}
@@ -181,8 +187,19 @@ export default function PlayerManager({ gameState, updateState }) {
                                 type="text"
                                 value={editName}
                                 onChange={e => setEditName(e.target.value)}
-                                className="bg-slate-950 border-2 border-slate-600 rounded-lg p-3 text-2xl font-black text-center text-teal-300 mb-8 outline-none focus:border-teal-500 shadow-inner"
+                                className="bg-slate-950 border-2 border-slate-600 rounded-lg p-3 text-2xl font-black text-center text-teal-300 mb-6 outline-none focus:border-teal-500 shadow-inner"
                             />
+
+                            <label className="text-sm text-slate-400 mb-2 font-bold flex bg-slate-800 px-3 py-1 rounded w-fit">所属组别 (第一轮)</label>
+                            <select
+                                value={editGroup}
+                                onChange={e => setEditGroup(e.target.value)}
+                                className="bg-slate-950 border-2 border-slate-600 rounded-lg p-3 text-xl font-bold text-center text-teal-300 mb-8 outline-none focus:border-teal-500 shadow-inner cursor-pointer"
+                            >
+                                {[1, 2, 3, 4, 5, 6].map(g => (
+                                    <option key={g} value={g}>第 {g} 组</option>
+                                ))}
+                            </select>
 
                             {/* 头像展示与上传区域 */}
                             <label className="text-sm text-slate-400 mb-2 font-bold flex bg-slate-800 px-3 py-1 rounded w-fit">专用形象设定</label>

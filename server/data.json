@@ -1,15 +1,19 @@
 {
-  "round": 1,
+  "adminRound": 2,
+  "screenRound": 1.5,
+  "currentGroup": 1,
+  "pickingChallengerId": null,
   "players": [
     {
       "id": 1,
       "name": "等等当",
       "avatar": "/avatar/avatar_1_1771947030747.png",
-      "score": 95,
+      "score": 0,
       "status": "default",
       "pkAgainst": null,
       "judgeScore": 100,
-      "publicScore": 80
+      "publicScore": 80,
+      "group": 2
     },
     {
       "id": 2,
@@ -17,7 +21,10 @@
       "avatar": "/avatar/avatar_2_1771947445063.png",
       "score": 0,
       "status": "default",
-      "pkAgainst": null
+      "pkAgainst": null,
+      "group": 2,
+      "judgeScore": 80,
+      "publicScore": 76
     },
     {
       "id": 3,
@@ -33,7 +40,8 @@
       "avatar": "https://i.pravatar.cc/150?u=4",
       "score": 0,
       "status": "default",
-      "pkAgainst": null
+      "pkAgainst": null,
+      "group": 2
     },
     {
       "id": 5,
@@ -65,7 +73,8 @@
       "avatar": "https://i.pravatar.cc/150?u=8",
       "score": 0,
       "status": "default",
-      "pkAgainst": null
+      "pkAgainst": null,
+      "group": 2
     },
     {
       "id": 9,
@@ -153,7 +162,8 @@
       "avatar": "https://i.pravatar.cc/150?u=19",
       "score": 0,
       "status": "default",
-      "pkAgainst": null
+      "pkAgainst": null,
+      "group": 4
     },
     {
       "id": 20,
@@ -246,17 +256,65 @@
   ],
   "pkMatches": [
     {
+      "challengerId": 11,
+      "masterId": 8,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
+      "challengerId": 14,
+      "masterId": 7,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
       "challengerId": 12,
       "masterId": 4,
       "challengerScore": 0,
       "masterScore": 0,
-      "status": "active"
+      "status": "pending"
+    },
+    {
+      "challengerId": 13,
+      "masterId": 3,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
+      "challengerId": 16,
+      "masterId": 5,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
+      "challengerId": 15,
+      "masterId": 9,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
+      "challengerId": 17,
+      "masterId": 10,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
+    },
+    {
+      "challengerId": 18,
+      "masterId": 6,
+      "challengerScore": 0,
+      "masterScore": 0,
+      "status": "pending"
     }
   ],
   "demonKingScore": 0,
-  "activeDemonKingId": 1,
+  "activeDemonKingId": null,
   "demonKingAvgScore": 0,
   "dkScoreSubmitted": false,
-  "resurrectionCalculated": true,
-  "theme": "theme-gold"
+  "resurrectionCalculated": false
 }
