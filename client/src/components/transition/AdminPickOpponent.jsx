@@ -45,13 +45,31 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         updateState({ ...gameState, pickingChallengerId: null });
     };
 
+    const handleSeedData = () => {
+        if (!window.confirm('⚠️ 一键填入测试配对？\n将自动把挑战者和守播区选手一一配对，覆盖现有配对列表。')) return;
+        const newMatches = challengers.map((c, i) => ({
+            challengerId: c.id,
+            masterId: masters[i].id,
+            challengerScore: 0,
+            masterScore: 0,
+            status: 'pending'
+        }));
+        updateState({ ...gameState, pkMatches: newMatches, pickingChallengerId: null });
+    };
+
     return (
         <div className="mt-8 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
             <div className="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
                 <h2 className="text-2xl font-bold text-teal-400 flex items-center">
                     过渡阶段：挑选对手
                 </h2>
-                <div className="space-x-4">
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSeedData}
+                        className="px-4 py-2 rounded font-bold transition-all bg-violet-600/80 hover:bg-violet-500 text-white border border-violet-400/50 text-sm"
+                    >
+                        🧪 填入测试配对
+                    </button>
                     <button
                         onClick={() => updateState({ ...gameState, screenRound: 1.5 })}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-colors"
@@ -82,10 +100,10 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                         <button
                                             key={c.id}
                                             onClick={() => handleSetPicking(c.id)}
-                                            className={`w-full text-left p-3 rounded-lg flex items-center transition-colors ${gameState.pickingChallengerId === c.id ? 'bg-emerald-600 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)] border-transparent' : 'bg-slate-800 text-slate-300 border border-slate-600 hover:bg-slate-700'}`}
+                                            className={`w-full text-left p-2 rounded-2xl flex items-center gap-3 transition-all shadow-inner backdrop-blur-sm border ${gameState.pickingChallengerId === c.id ? 'bg-emerald-600/70 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)] border-emerald-400' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}
                                         >
-                                            <img src={getFullAvatarUrl(c.avatar)} alt="" className="w-8 h-8 rounded-full mr-3 object-cover" />
-                                            <span>{c.name} (第{sortedPlayers.findIndex(x => x.id === c.id) + 1}名)</span>
+                                            <img src={getFullAvatarUrl(c.avatar)} alt="" className="w-9 h-9 rounded-full border border-white/20 object-cover flex-shrink-0" />
+                                            <span className="font-bold">{c.name} (第{sortedPlayers.findIndex(x => x.id === c.id) + 1}名)</span>
                                             {gameState.pickingChallengerId === c.id && <span className="ml-auto text-xs font-bold bg-white text-emerald-600 px-2 rounded-full">正在挑选</span>}
                                         </button>
                                     )
@@ -125,19 +143,19 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                         const cInfo = gameState.players.find(p => p.id === m.challengerId);
                         const mInfo = gameState.players.find(p => p.id === m.masterId);
                         return (
-                            <div key={idx} className="p-4 mb-3 border border-slate-600 bg-slate-800 rounded-xl flex items-center justify-between">
-                                <div className="flex items-center space-x-4 flex-1">
-                                    <div className="flex flex-col items-center w-1/3">
-                                        <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-teal-500 mb-1 object-cover" />
-                                        <span className="text-sm font-bold text-teal-400 truncate w-full text-center">{cInfo?.name}</span>
+                            <div key={idx} className="p-3 mb-3 border border-white/10 bg-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-between shadow-inner">
+                                <div className="flex items-center space-x-3 flex-1">
+                                    <div className="flex items-center gap-2 bg-teal-600/20 border border-teal-500/30 rounded-full px-2 py-1 w-1/3">
+                                        <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-8 h-8 rounded-full border border-teal-500/50 object-cover flex-shrink-0" />
+                                        <span className="text-sm font-bold text-teal-300 truncate">{cInfo?.name}</span>
                                     </div>
-                                    <div className="text-xl font-black text-slate-500 italic flex-1 text-center">VS</div>
-                                    <div className="flex flex-col items-center w-1/3">
-                                        <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-emerald-500 mb-1 object-cover" />
-                                        <span className="text-sm font-bold text-emerald-400 truncate w-full text-center">{mInfo?.name}</span>
+                                    <div className="text-base font-black text-slate-500 italic flex-1 text-center">VS</div>
+                                    <div className="flex items-center gap-2 bg-emerald-600/20 border border-emerald-500/30 rounded-full px-2 py-1 w-1/3 justify-end flex-row-reverse">
+                                        <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-8 h-8 rounded-full border border-emerald-500/50 object-cover flex-shrink-0" />
+                                        <span className="text-sm font-bold text-emerald-300 truncate">{mInfo?.name}</span>
                                     </div>
                                 </div>
-                                <div className="ml-4">
+                                <div className="ml-3">
                                     <button onClick={() => handleUnpair(idx)} className="text-xs bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white border border-red-600 p-2 rounded transition-colors" title="撤销配对">
                                         ✕
                                     </button>

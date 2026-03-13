@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import AdminRound1 from '../components/round1/AdminRound1';
 import AdminRound2 from '../components/round2/AdminRound2';
@@ -9,106 +9,221 @@ import PlayerManager from '../components/PlayerManager';
 
 export default function Admin() {
     const { gameState, updateState } = useGameState();
+    const [adminMatchIndex, setAdminMatchIndex] = useState(0);
+    const [adminGroup, setAdminGroup] = useState(gameState?.currentGroup || 1);
+    const [adminRound1Mode, setAdminRound1Mode] = useState(gameState?.round1Mode || 'group');
 
     if (!gameState) return <div className="p-8 text-white flex justify-center items-center min-h-screen text-2xl font-bold bg-slate-900">连接服务器中...</div>;
 
     const currentTheme = gameState.theme || 'theme-dark';
 
+    const phases = [
+        { value: 0,   label: '赛前设置',  icon: '⚙️' },
+        { value: 1,   label: '第一轮',    icon: '🎤' },
+        { value: 1.5, label: '过渡挑选',  icon: '⚔️' },
+        { value: 2,   label: '第二轮',    icon: '🥊' },
+        { value: 3,   label: '大魔王',    icon: '👑' },
+        { value: 4,   label: '终极补位',  icon: '🏆' },
+    ];
+    const phaseIndex = (v) => phases.findIndex(p => p.value === v);
+    const adminIdx = phaseIndex(gameState.adminRound);
+    const screenIdx = phaseIndex(gameState.screenRound);
+
+    const screenPinLabel = (() => {
+        const sr = gameState.screenRound;
+        if (sr === 1) {
+            if (gameState.round1Mode === 'full') return '第一轮【完整排名】';
+            if (gameState.round1Mode === 'groupIntro') return '第一轮【分组介绍】';
+            return `第一轮【第${gameState.currentGroup ?? 1}组】`;
+        }
+        if (sr === 2) {
+            const idx = gameState.screenMatchIndex ?? 0;
+            const m = (gameState.pkMatches || [])[idx];
+            const c = m ? gameState.players.find(p => p.id === m.challengerId)?.name : null;
+            const ms = m ? gameState.players.find(p => p.id === m.masterId)?.name : null;
+            return `第二轮【第${idx + 1}场${c && ms ? ` ${c}vs${ms}` : ''}】`;
+        }
+        return phases[screenIdx]?.label;
+    })();
+
     return (
-        <div className="p-8 text-white bg-slate-900 min-h-screen font-sans">
+        <div className="min-h-screen text-white bg-slate-900 font-sans p-8">
+            {/* Header */}
             <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
                 <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">
                     控制中心 | 校园歌手大赛
                 </h1>
                 <div className="flex space-x-4 items-center">
-                    <span className="text-xl text-teal-300 font-bold border-r border-slate-600 pr-4 mt-2">
-                        大屏当前: 阶段 {gameState.screenRound}
-                    </span>
-                    <button
-                        onClick={() => updateState({ ...gameState, screenRound: gameState.adminRound })}
-                        className="bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-2 rounded-lg shadow-lg animate-pulse"
-                    >
-                        🚀 强制大屏同步至当前后台阶段
-                    </button>
                     <span className="text-sm text-slate-400">实时连接正常 🟢</span>
                 </div>
             </div>
 
-            <div className="flex flex-col xl:flex-row gap-6 mb-6">
-                <div className="flex-1 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
-                    <h2 className="text-xl mb-4 text-slate-300 font-bold border-l-4 border-teal-500 pl-3">比赛阶段控制 (仅影响本地操作)</h2>
-                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+            {/* ═══ UNIFIED PHASE CONTROL + THEME ═══ */}
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl mb-6 flex gap-5">
+
+                {/* LEFT: Phase track + sub-panel */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-base font-bold text-slate-300 border-l-4 border-teal-500 pl-3">比赛阶段控制</h2>
                         <button
-                            onClick={() => updateState({ ...gameState, adminRound: 0 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 0 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
+                            onClick={() => {
+                                if (gameState.adminRound === 1) {
+                                    // R1: also commit the currently editing group/mode to screen
+                                    updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
+                                } else if (gameState.adminRound === 2) {
+                                    updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
+                                } else {
+                                    updateState({ ...gameState, screenRound: gameState.adminRound });
+                                }
+                            }}
+                            className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
                         >
-                            ⚙️ 赛前设置
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, adminRound: 1 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 1 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            第一轮: 30进18排位
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, adminRound: 1.5 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 1.5 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            过渡: 挑选对手
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, adminRound: 2 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 2 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            第二轮: 16人PK
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, adminRound: 3 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 3 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            附加赛: 大魔王
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, adminRound: 4 })}
-                            className={`py-3 px-4 rounded-xl font-bold transition-all shadow-md ${gameState.adminRound === 4 ? 'bg-gradient-to-r from-teal-600 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] transform scale-[1.02] text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            第三轮: 终极补位
+                            📺 投屏
                         </button>
                     </div>
+
+                    {/* Phase buttons */}
+                    <div className="grid grid-cols-6 gap-2">
+                        {phases.map((ph) => (
+                            <button
+                                key={ph.value}
+                                onClick={() => updateState({ ...gameState, adminRound: ph.value })}
+                                className={`relative py-3 px-2 rounded-xl font-bold text-sm transition-all shadow-md flex flex-col items-center gap-1 overflow-hidden ${
+                                    gameState.adminRound === ph.value
+                                        ? 'bg-gradient-to-b from-teal-600 to-teal-800 text-white shadow-[0_0_14px_rgba(20,184,166,0.6)] scale-[1.03]'
+                                        : 'bg-slate-700/80 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                                }`}
+                            >
+                                <span className="text-xl">{ph.icon}</span>
+                                <span className="text-xs leading-tight text-center">{ph.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Pin rail */}
+                    <div className="mt-3 relative h-12 select-none">
+                        <div className="absolute inset-y-[18px] inset-x-0 h-1.5 bg-slate-700 rounded-full" />
+                        {[0,1,2,3,4,5].map(i => (
+                            <div key={i} className="absolute top-[14px] w-0.5 h-4 bg-slate-600 rounded-full" style={{left: `calc(${i}/5 * (100% - 8.33%) + 4.17%)`}} />
+                        ))}
+                        {/* Admin (edit) pin — teal */}
+                        <div
+                            className="absolute transition-all duration-300 flex flex-col items-center"
+                            style={{left: `calc(${adminIdx}/5 * (100% - 8.33%) + 4.17%)`, transform: 'translateX(-50%)', bottom: 0}}
+                        >
+                            <div className="bg-teal-500 text-white rounded-full px-2.5 py-0.5 text-[11px] font-black shadow-[0_0_8px_rgba(20,184,166,0.8)] whitespace-nowrap flex items-center gap-1">
+                                <span>✏️</span><span>编辑中</span>
+                            </div>
+                            <div className="w-0.5 h-3 bg-teal-400" />
+                            <div className="w-3 h-3 bg-teal-400 rounded-full shadow-[0_0_6px_rgba(20,184,166,0.9)] ring-2 ring-teal-300" />
+                        </div>
+                        {/* Screen (display) pin — amber */}
+                        <div
+                            className="absolute transition-all duration-300 flex flex-col items-center"
+                            style={{left: `calc(${screenIdx}/5 * (100% - 8.33%) + 4.17%)`, transform: 'translateX(-50%)', top: 0}}
+                        >
+                            <div className="w-3 h-3 bg-amber-400 rounded-full shadow-[0_0_6px_rgba(251,191,36,0.9)] ring-2 ring-amber-300" />
+                            <div className="w-0.5 h-3 bg-amber-400" />
+                            <div className="bg-amber-500 text-white rounded-full px-2.5 py-0.5 text-[11px] font-black shadow-[0_0_8px_rgba(251,191,36,0.8)] whitespace-nowrap flex items-center gap-1">
+                                <span>📺</span><span>大屏中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Status label row */}
+                    <div className="mt-1 flex justify-between px-1 mb-4">
+                        <span className="text-xs text-teal-400 font-bold">✏️ 编辑: {phases[adminIdx]?.label}</span>
+                        <span className="text-xs text-amber-400 font-bold">📺 大屏: {screenPinLabel}</span>
+                    </div>
+
+                    {/* ── Per-phase sub-panel ── */}
+
+                    {/* Round 1: group selector + broadcast */}
+                    {gameState.adminRound === 1 && (
+                        <div className="flex flex-wrap gap-2 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                            <button
+                                onClick={() => { setAdminRound1Mode('groupIntro'); }}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all text-sm ${adminRound1Mode === 'groupIntro' ? 'bg-pink-600 text-white shadow-[0_0_10px_rgba(219,39,119,0.6)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                            >
+                                📋 分组介绍
+                            </button>
+                            {[1, 2, 3, 4, 5, 6].map(g => (
+                                <button
+                                    key={g}
+                                    onClick={() => { setAdminGroup(g); setAdminRound1Mode('group'); }}
+                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${adminGroup === g && adminRound1Mode === 'group' ? 'bg-teal-600 text-white shadow-[0_0_10px_rgba(13,148,136,0.6)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    第 {g} 组
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Round 1.5 transition: broadcast picking phase */}
+                    {gameState.adminRound === 1.5 && (
+                        <div className="flex flex-wrap gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
+                            <button
+                                onClick={() => updateState({ ...gameState, screenRound: 1.5 })}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-colors"
+                            >
+                                📺 投屏展示挑选环节
+                            </button>
+                            <button
+                                onClick={() => updateState({ ...gameState, pickingChallengerId: null })}
+                                className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                            >
+                                清除大屏选中状态
+                            </button>
+                        </div>
+                    )}
+
                 </div>
 
-                <div className="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 xl:w-80">
-                    <h2 className="text-xl mb-4 text-slate-300 font-bold border-l-4 border-pink-500 pl-3">大屏视觉主题</h2>
-                    <div className="flex flex-col gap-3">
-                        <button
-                            onClick={() => updateState({ ...gameState, theme: 'theme-dark' })}
-                            className={`py-2 px-4 rounded-lg font-bold transition-all flex items-center justify-between ${currentTheme === 'theme-dark' ? 'bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.5)] border-transparent' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            <span>🌌 科技深色 (默认)</span>
-                            {currentTheme === 'theme-dark' && <span className="text-xs bg-white text-indigo-600 px-2 rounded-full">当前</span>}
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, theme: 'theme-gold' })}
-                            className={`py-2 px-4 rounded-lg font-bold transition-all flex items-center justify-between ${currentTheme === 'theme-gold' ? 'bg-amber-600 shadow-[0_0_10px_rgba(217,119,6,0.5)] border-transparent text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            <span>✨ 黑金奢华 (决赛)</span>
-                            {currentTheme === 'theme-gold' && <span className="text-xs bg-white text-amber-600 px-2 rounded-full">当前</span>}
-                        </button>
-                        <button
-                            onClick={() => updateState({ ...gameState, theme: 'theme-light' })}
-                            className={`py-2 px-4 rounded-lg font-bold transition-all flex items-center justify-between ${currentTheme === 'theme-light' ? 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)] border-transparent text-white' : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'}`}
-                        >
-                            <span>🍃 清新浅色 (白天)</span>
-                            {currentTheme === 'theme-light' && <span className="text-xs bg-white text-sky-500 px-2 rounded-full">当前</span>}
-                        </button>
-                    </div>
+
+                {/* RIGHT: Compact theme selector */}
+                <div className="flex-shrink-0 w-44 flex flex-col gap-2 border-l border-slate-700 pl-5">
+                    <div className="text-xs font-bold text-slate-400 mb-1 border-l-4 border-pink-500 pl-2">大屏主题</div>
+                    <button
+                        onClick={() => updateState({ ...gameState, theme: 'theme-dark' })}
+                        className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${
+                            currentTheme === 'theme-dark'
+                                ? 'bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.5)] text-white'
+                                : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                        }`}
+                    >
+                        🌌 <span className="truncate">科技深色</span>
+                        {currentTheme === 'theme-dark' && <span className="ml-auto text-[10px] bg-white text-indigo-600 px-1.5 rounded-full">当前</span>}
+                    </button>
+                    <button
+                        onClick={() => updateState({ ...gameState, theme: 'theme-gold' })}
+                        className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${
+                            currentTheme === 'theme-gold'
+                                ? 'bg-amber-600 shadow-[0_0_10px_rgba(217,119,6,0.5)] text-white'
+                                : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                        }`}
+                    >
+                        ✨ <span className="truncate">黑金奢华</span>
+                        {currentTheme === 'theme-gold' && <span className="ml-auto text-[10px] bg-white text-amber-600 px-1.5 rounded-full">当前</span>}
+                    </button>
+                    <button
+                        onClick={() => updateState({ ...gameState, theme: 'theme-light' })}
+                        className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${
+                            currentTheme === 'theme-light'
+                                ? 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)] text-white'
+                                : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                        }`}
+                    >
+                        🍃 <span className="truncate">清新浅色</span>
+                        {currentTheme === 'theme-light' && <span className="ml-auto text-[10px] bg-white text-sky-500 px-1.5 rounded-full">当前</span>}
+                    </button>
                 </div>
             </div>
 
+            {/* ═══ Phase component panels ═══ */}
             {gameState.adminRound === 0 && <PlayerManager gameState={gameState} updateState={updateState} />}
-            {gameState.adminRound === 1 && <AdminRound1 gameState={gameState} updateState={updateState} />}
+            {gameState.adminRound === 1 && <AdminRound1 gameState={gameState} updateState={updateState} adminGroup={adminGroup} />}
             {gameState.adminRound === 1.5 && <AdminPickOpponent gameState={gameState} updateState={updateState} />}
-            {gameState.adminRound === 2 && <AdminRound2 gameState={gameState} updateState={updateState} />}
+            {gameState.adminRound === 2 && <AdminRound2 gameState={gameState} updateState={updateState} adminMatchIndex={adminMatchIndex} setAdminMatchIndex={setAdminMatchIndex} />}
             {gameState.adminRound === 3 && <AdminRound3 gameState={gameState} updateState={updateState} />}
             {gameState.adminRound === 4 && <AdminRound4 gameState={gameState} updateState={updateState} />}
         </div>

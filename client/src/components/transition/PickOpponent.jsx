@@ -41,7 +41,9 @@ export default function PickOpponent({ gameState }) {
                             <div key={master.id} className="relative bg-slate-800/80 border border-slate-600 rounded-2xl p-4 flex flex-col items-center">
                                 {/* 擂主形象 */}
                                 <div className="absolute top-2 left-2 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-br-lg rounded-tl-lg shadow-lg z-10">擂主</div>
-                                <img src={getFullAvatarUrl(master.avatar)} alt="" className="w-20 h-20 rounded-full border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)] object-cover z-0" />
+                                <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5),0_0_12px_rgba(52,211,153,0.2)]">
+                                    <img src={getFullAvatarUrl(master.avatar)} alt="" className="w-20 h-20 rounded-full border border-emerald-400/40 object-cover block" />
+                                </div>
                                 <div className="text-lg font-bold text-white mt-2">{master.name}</div>
                                 <div className="text-xs text-slate-400">排名: NO.{sortedPlayers.findIndex(x => x.id === master.id) + 1}</div>
 
@@ -54,7 +56,9 @@ export default function PickOpponent({ gameState }) {
                                             className="w-full flex items-center justify-between"
                                         >
                                             <div className="flex items-center space-x-2">
-                                                <img src={getFullAvatarUrl(matchedChallenger.avatar)} alt="" className="w-8 h-8 rounded-full border border-teal-400" />
+                                            <div className="rounded-full p-[1px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.4)] flex-shrink-0">
+                                                <img src={getFullAvatarUrl(matchedChallenger.avatar)} alt="" className="w-8 h-8 rounded-full border border-teal-400/40 object-cover block" />
+                                            </div>
                                                 <span className="text-sm font-bold text-teal-300">{matchedChallenger.name}</span>
                                             </div>
                                             <span className="text-[10px] text-red-400 font-bold border border-red-500/50 px-1 rounded">VS</span>
@@ -100,7 +104,9 @@ export default function PickOpponent({ gameState }) {
                                     {isPicking && (
                                         <div className="absolute -top-3 bg-teal-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-lg font-bold animate-pulse">正在挑选</div>
                                     )}
-                                    <img src={getFullAvatarUrl(challenger.avatar)} alt="" className={`w-14 h-14 rounded-full border object-cover mb-2 ${isPicking ? 'border-teal-300' : 'border-slate-600'}`} />
+                                    <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5)]">
+                                        <img src={getFullAvatarUrl(challenger.avatar)} alt="" className={`w-14 h-14 rounded-full border object-cover block ${isPicking ? 'border-teal-300/50' : 'border-slate-600/50'}`} />
+                                    </div>
                                     <span className={`text-xs font-bold text-center w-full truncate ${isPicking ? 'text-teal-200' : 'text-slate-400'}`}>{challenger.name}</span>
                                 </motion.div>
                             )

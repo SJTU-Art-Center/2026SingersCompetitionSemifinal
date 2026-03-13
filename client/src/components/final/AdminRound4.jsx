@@ -59,10 +59,23 @@ export default function AdminRound4({ gameState, updateState }) {
         setSimulated(false);
     };
 
+    const handleSeedData = () => {
+        if (!window.confirm('⚠️ 一键执行补位计算？\n将把待定区排名前 ' + remainingSpots + ' 名选手提升为复活状态，覆盖现有计算结果。')) return;
+        handleCalculateResurrection();
+    };
+
     return (
         <div className="mt-8 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-            <h2 className="text-2xl font-bold text-teal-400 border-b border-slate-700 pb-4 mb-6">最终决选：十强名额补位</h2>
-
+            <div className="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+                <h2 className="text-2xl font-bold text-teal-400">最终决选：十强名额补位</h2>
+                <button
+                    onClick={handleSeedData}
+                    disabled={remainingSpots === 0}
+                    className={`px-4 py-2 rounded font-bold transition-all text-sm ${remainingSpots === 0 ? 'bg-slate-700 text-slate-500 cursor-not-allowed border border-slate-600' : 'bg-violet-600/80 hover:bg-violet-500 text-white border border-violet-400/50'}`}
+                >
+                    🧪 一键计算补位
+                </button>
+            </div>
             <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-1 border-r border-slate-700 pr-6">
                     <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl text-center mb-6">

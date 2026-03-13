@@ -45,7 +45,9 @@ export default function DemonKing({ gameState }) {
                     transition={{ type: 'spring' }}
                     className={`bg-[var(--color-card-bg)] border-4 rounded-[40px] p-12 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-emerald-400 shadow-[0_4px_30px_rgba(16,185,129,0.4)]' : (isFailed ? 'border-slate-600 grayscale brightness-75' : 'border-teal-500 shadow-lg')}`}
                 >
-                    <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-64 h-64 rounded-full border-[8px] object-cover mt-4 mb-8 ${isSuccess ? 'border-emerald-400' : 'border-teal-500'}`} />
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.7),0_0_30px_rgba(20,184,166,0.2)] mt-4 mb-8">
+                        <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-64 h-64 rounded-full border-[4px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
+                    </div>
                     <h3 className="text-6xl font-black tracking-widest">{dk.name}</h3>
 
                     <div className="w-full mt-16 px-12 relative flex flex-col items-center">

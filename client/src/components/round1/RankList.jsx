@@ -63,8 +63,10 @@ export default function RankList({ gameState }) {
                                 {isGroupMode ? 'GROUP' : `NO.${index + 1}`} | {getRankLabel(index, !isGroupMode)}
                             </div>
 
-                            <div className="flex items-center space-x-4 mt-2">
-                                <img src={getFullAvatarUrl(player.avatar)} alt={player.name} className="w-16 h-16 rounded-full border border-white/30 shadow-md object-cover relative z-10" />
+                            <div className="flex items-center space-x-3 mt-2 bg-black/20 backdrop-blur-sm border border-white/10 rounded-full px-3 py-1.5 shadow-inner">
+                                <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex-shrink-0">
+                                    <img src={getFullAvatarUrl(player.avatar)} alt={player.name} className="w-14 h-14 rounded-full border border-white/20 shadow-inner object-cover block" />
+                                </div>
                                 <div className="relative z-10">
                                     <h3 className="text-xl font-bold tracking-wide">{player.name}</h3>
                                 </div>

@@ -1,49 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 
-export default function AdminRound2({ gameState, updateState }) {
-    // 分离出挑战者(11-18) 和 擂主(3-10)
-    // 此处根据第一轮的分数自动推导
+export default function AdminRound2({ gameState, updateState, adminMatchIndex, setAdminMatchIndex }) {
     const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score || a.id - b.id);
     const masters = sortedPlayers.slice(2, 10);
     const challengers = sortedPlayers.slice(10, 18);
 
-    // 匹配数据结构: gameState.pkMatches: [{ challengerId, masterId, challengerScore, masterScore, winner: null|'master'|'challenger'|'both_pending', status: 'pending'|'active'|'finished' }]
-    // 在 Server 中初始化时有 pkMatches
     const pkMatches = gameState.pkMatches || [];
+    const activeMatchIndex = adminMatchIndex ?? 0;
 
-    const [activeMatchIndex, setActiveMatchIndex] = useState(
-        pkMatches.findIndex(m => m.status === 'active') >= 0
-            ? pkMatches.findIndex(m => m.status === 'active')
-            : 0
-    );
-
-    const [cScore, setCScore] = useState("");
-    const [mScore, setMScore] = useState("");
+    const [cScore, setCScore] = useState('');
+    const [mScore, setMScore] = useState('');
 
     const handleStartMatch = (index) => {
         const newMatches = [...pkMatches];
-        newMatches.forEach(m => { if (m.status === 'active') m.status = 'finished' });
+        newMatches.forEach(m => { if (m.status === 'active') m.status = 'finished'; });
         newMatches[index].status = 'active';
         updateState({ ...gameState, pkMatches: newMatches });
-        setActiveMatchIndex(index);
-        setCScore("");
-        setMScore("");
+        setAdminMatchIndex(index);
+        setCScore('');
+        setMScore('');
     };
 
     const handleSubmitScore = () => {
         const match = pkMatches[activeMatchIndex];
         if (!match) return;
-
         const cs = parseFloat(cScore);
         const ms = parseFloat(mScore);
-        if (isNaN(cs) || isNaN(ms)) return alert("请输入有效分数");
+        if (isNaN(cs) || isNaN(ms)) return alert('请输入有效分数');
 
         let winner = null;
         let newPlayersState = [...gameState.players];
 
         if (ms > cs) {
-            // 擂主胜
             winner = 'master';
             newPlayersState = newPlayersState.map(p => {
                 if (p.id === match.masterId) return { ...p, status: 'advanced' };
@@ -51,7 +40,6 @@ export default function AdminRound2({ gameState, updateState }) {
                 return p;
             });
         } else {
-            // 挑战者赢或平局（都掉入待定）
             winner = 'both_pending';
             newPlayersState = newPlayersState.map(p => {
                 if (p.id === match.masterId) return { ...p, status: 'pending' };
@@ -61,75 +49,171 @@ export default function AdminRound2({ gameState, updateState }) {
         }
 
         const newMatches = [...pkMatches];
-        newMatches[activeMatchIndex] = {
-            ...match,
-            challengerScore: cs,
-            masterScore: ms,
-            winner,
-            status: 'finished'
-        };
-
+        newMatches[activeMatchIndex] = { ...match, challengerScore: cs, masterScore: ms, winner, status: 'finished' };
         updateState({ ...gameState, pkMatches: newMatches, players: newPlayersState });
+        setCScore('');
+        setMScore('');
     };
 
-    return (
-        <div className="mt-8 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-            <h2 className="text-2xl font-bold text-teal-400 border-b border-slate-700 pb-4 mb-6">第二轮管理：1v1 PK配置</h2>
+    const handleSeedData = () => {
+        if (!window.confirm('⚠️ 一键填入第二轮测试数据？\n将为所有8场对战随机生成分数并自动判定胜负，覆盖所有对战状态。')) return;
+        let newPlayers = [...gameState.players];
+        const newMatches = pkMatches.map(match => {
+            const cs = parseFloat((70 + Math.random() * 25).toFixed(1));
+            const ms = parseFloat((70 + Math.random() * 25).toFixed(1));
+            let winner;
+            if (ms > cs) {
+                winner = 'master';
+                newPlayers = newPlayers.map(p => {
+                    if (p.id === match.masterId) return { ...p, status: 'advanced' };
+                    if (p.id === match.challengerId) return { ...p, status: 'eliminated' };
+                    return p;
+                });
+            } else {
+                winner = 'both_pending';
+                newPlayers = newPlayers.map(p => {
+                    if (p.id === match.masterId) return { ...p, status: 'pending' };
+                    if (p.id === match.challengerId) return { ...p, status: 'pending' };
+                    return p;
+                });
+            }
+            return { ...match, challengerScore: cs, masterScore: ms, winner, status: 'finished' };
+        });
+        updateState({ ...gameState, pkMatches: newMatches, players: newPlayers });
+    };
 
-            {/* 比赛列表与打分 */}
-            <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-1 border-r border-slate-700 pr-6 h-[500px] overflow-auto custom-scrollbar">
-                    <h3 className="text-xl mb-4 text-slate-300">对战列表 ({pkMatches.length}/8)</h3>
-                    {pkMatches.map((m, idx) => {
-                        const cInfo = gameState.players.find(p => p.id === m.challengerId);
-                        const mInfo = gameState.players.find(p => p.id === m.masterId);
-                        return (
-                            <div key={idx} className={`p-3 mb-3 border rounded-lg ${m.status === 'active' ? 'border-emerald-500 bg-emerald-900/30' : 'border-slate-700 bg-slate-800'}`}>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-teal-400">{cInfo?.name}</span>
-                                    <span className="text-emerald-500 font-bold">VS</span>
-                                    <span className="text-green-400">{mInfo?.name}</span>
-                                </div>
-                                {m.status === 'pending' && (
-                                    <button onClick={() => handleStartMatch(idx)} className="mt-2 text-xs bg-teal-600 px-3 py-1 rounded w-full text-white">播放到大屏</button>
-                                )}
-                                {m.status === 'finished' && (
-                                    <div className="text-xs text-center mt-2 text-slate-500">已完赛</div>
-                                )}
-                            </div>
-                        )
-                    })}
+    const activeMatch = pkMatches[activeMatchIndex];
+    const cInfo = activeMatch ? gameState.players.find(p => p.id === activeMatch.challengerId) : null;
+    const mInfo = activeMatch ? gameState.players.find(p => p.id === activeMatch.masterId) : null;
+    const isActive = activeMatch?.status === 'active';
+    const isFinished = activeMatch?.status === 'finished';
+
+    return (
+        <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h2 className="text-xl font-bold text-teal-400 flex items-center">
+                    <span className="bg-teal-600 text-white w-7 h-7 rounded justify-center items-center flex mr-2 text-xs">2</span>
+                    第二轮管理：1v1 PK成绩录入
+                </h2>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSeedData}
+                        className="px-4 py-2 rounded font-bold transition-all bg-violet-600/80 hover:bg-violet-500 text-white border border-violet-400/50 text-sm"
+                    >
+                        🧪 填入测试数据
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 左侧：对战列表 */}
+                <div className="col-span-2">
+                    <h3 className="text-sm mb-2 text-slate-300 font-bold border-l-4 border-slate-500 pl-2">对战列表 ({pkMatches.length}/8)</h3>
+                    <div className="grid grid-cols-4 gap-2">
+                        {pkMatches.map((m, idx) => {
+                            const c = gameState.players.find(p => p.id === m.challengerId);
+                            const master = gameState.players.find(p => p.id === m.masterId);
+                            const isSelected = activeMatchIndex === idx;
+                            const isAct = m.status === 'active';
+                            const isFin = m.status === 'finished';
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => setAdminMatchIndex(idx)}
+                                    className={`py-1.5 px-1.5 rounded-xl transition-all border flex flex-col items-center gap-1 ${isSelected ? 'bg-teal-700/60 text-white shadow-[0_0_12px_rgba(20,184,166,0.4)] border-teal-400 scale-105 backdrop-blur-sm' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 backdrop-blur-sm shadow-inner'}`}
+                                >
+                                    <div className="flex gap-1 items-center">
+                                        <img src={getFullAvatarUrl(c?.avatar)} alt="" className="w-5 h-5 rounded-full border border-teal-500/50 object-cover" />
+                                        <img src={getFullAvatarUrl(master?.avatar)} alt="" className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
+                                    </div>
+                                    <div className="text-[10px] font-bold w-full text-center leading-tight">
+                                        <span className="text-teal-300">{c?.name ?? '?'}</span>
+                                        <span className="text-slate-500 mx-0.5">vs</span>
+                                        <span className="text-emerald-300">{master?.name ?? '?'}</span>
+                                    </div>
+                                    <div className={`text-[10px] font-mono ${isFin ? 'text-emerald-300' : isAct ? 'text-yellow-400' : 'text-slate-500'}`}>
+                                        {isFin ? `${m.challengerScore?.toFixed(1)}:${m.masterScore?.toFixed(1)}` : isAct ? '打分中' : `#${idx + 1}`}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                <div className="col-span-2 pl-4">
-                    {activeMatchIndex >= 0 && pkMatches[activeMatchIndex] && pkMatches[activeMatchIndex].status === 'active' ? (() => {
-                        const m = pkMatches[activeMatchIndex];
-                        const cInfo = gameState.players.find(p => p.id === m.challengerId);
-                        const mInfo = gameState.players.find(p => p.id === m.masterId);
-                        return (
-                            <div className="text-center">
-                                <h3 className="text-3xl font-black mb-8 text-teal-400">正在进行 PK 打分</h3>
-                                <div className="flex justify-center items-center space-x-12 mb-10">
-                                    <div className="flex flex-col items-center">
-                                        <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-24 h-24 rounded-full border-4 border-teal-500 mb-3" />
-                                        <span className="text-xl font-bold bg-teal-600 px-3 rounded text-white">{cInfo?.name} (挑战者)</span>
-                                        <input type="number" step="0.01" value={cScore} onChange={e => setCScore(e.target.value)} className="mt-4 bg-slate-800 border p-2 text-center text-2xl w-32 outline-none border-teal-500 rounded text-teal-300" placeholder="本轮得分" />
-                                    </div>
-                                    <div className="text-6xl font-black text-emerald-600 italic">VS</div>
-                                    <div className="flex flex-col items-center">
-                                        <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-24 h-24 rounded-full border-4 border-emerald-500 mb-3" />
-                                        <span className="text-xl font-bold bg-emerald-600 px-3 rounded text-white">{mInfo?.name} (擂主)</span>
-                                        <input type="number" step="0.01" value={mScore} onChange={e => setMScore(e.target.value)} className="mt-4 bg-slate-800 border p-2 text-center text-2xl w-32 outline-none border-emerald-500 rounded text-emerald-300" placeholder="本轮得分" />
-                                    </div>
+                {/* 右侧：打分面板 */}
+                <div className="col-span-1 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
+                    <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
+                    {activeMatch ? (
+                        <div>
+                            {/* 两名选手信息 + 打分区并排 */}
+                            <div className="flex gap-2 mb-2">
+                                {/* 挑战者 */}
+                                <div className="flex-1 flex flex-col items-center bg-teal-900/20 border border-teal-800/50 rounded-lg py-2 px-1">
+                                    <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-teal-500 object-cover shadow mb-1" />
+                                    <div className="text-xs font-black text-teal-300 text-center">{cInfo?.name ?? '?'}</div>
+                                    <div className="text-[10px] text-teal-500">挑战者</div>
+                                    {isFinished && <div className="text-sm font-black text-teal-200 mt-1">{activeMatch.challengerScore?.toFixed(1)}</div>}
                                 </div>
-                                <button onClick={handleSubmitScore} className="bg-emerald-700 text-white text-2xl font-bold py-4 px-16 rounded-xl shadow-lg transform hover:scale-105 transition-all">
-                                    判定并展示特效
-                                </button>
+                                <div className="flex items-center text-slate-500 font-black text-sm">VS</div>
+                                {/* 擂主 */}
+                                <div className="flex-1 flex flex-col items-center bg-emerald-900/20 border border-emerald-800/50 rounded-lg py-2 px-1">
+                                    <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-emerald-500 object-cover shadow mb-1" />
+                                    <div className="text-xs font-black text-emerald-300 text-center">{mInfo?.name ?? '?'}</div>
+                                    <div className="text-[10px] text-emerald-500">擂主</div>
+                                    {isFinished && <div className="text-sm font-black text-emerald-200 mt-1">{activeMatch.masterScore?.toFixed(1)}</div>}
+                                </div>
                             </div>
-                        )
-                    })() : (
-                        <div className="flex items-center justify-center h-full text-slate-500">
-                            请从左侧选择一个未进行的对局点击“播放到大屏”
+
+                            {/* 状态/操作区 */}
+                            {isFinished ? (
+                                <div className="text-center py-2 text-xs text-slate-400 border border-slate-700 rounded-lg">
+                                    {activeMatch.winner === 'master' ? `${mInfo?.name} 擂主胜` : '两人进入待定'}
+                                </div>
+                            ) : isActive ? (
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex gap-1.5">
+                                        <div className="relative flex-1">
+                                            <span className="absolute left-1.5 top-1.5 text-[9px] text-teal-400 font-bold leading-none">挑战<br/>者分</span>
+                                            <input
+                                                type="number" step="0.01"
+                                                value={cScore}
+                                                onChange={e => setCScore(e.target.value)}
+                                                className="w-full bg-slate-800 border border-slate-600 rounded-lg py-1.5 pl-8 pr-1 border-l-4 border-l-teal-600 text-sm font-black text-right text-teal-300 focus:outline-none focus:border-teal-500"
+                                                placeholder="0-100"
+                                                onKeyDown={e => { if (e.key === 'Enter') document.getElementById('r2mScore')?.focus(); }}
+                                            />
+                                        </div>
+                                        <div className="relative flex-1">
+                                            <span className="absolute left-1.5 top-1.5 text-[9px] text-emerald-400 font-bold leading-none">擂主<br/>分</span>
+                                            <input
+                                                id="r2mScore"
+                                                type="number" step="0.01"
+                                                value={mScore}
+                                                onChange={e => setMScore(e.target.value)}
+                                                className="w-full bg-slate-800 border border-slate-600 rounded-lg py-1.5 pl-8 pr-1 border-l-4 border-l-emerald-500 text-sm font-black text-right text-emerald-300 focus:outline-none focus:border-emerald-500"
+                                                placeholder="0-100"
+                                                onKeyDown={e => { if (e.key === 'Enter') handleSubmitScore(); }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleSubmitScore}
+                                        className="w-full bg-teal-700 hover:bg-teal-600 border border-teal-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
+                                    >确认提交</button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => handleStartMatch(activeMatchIndex)}
+                                    className="w-full bg-teal-700 hover:bg-teal-600 text-white font-bold py-1.5 rounded-lg text-xs border border-teal-500 transition-all"
+                                >
+                                    ▶ 开始打分
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-slate-500 text-center py-6 flex flex-col items-center border border-dashed border-slate-700 rounded-xl">
+                            <span className="text-2xl mb-2 opacity-30">👈</span>
+                            <p className="text-xs">在左侧选择对战</p>
                         </div>
                     )}
                 </div>

@@ -56,9 +56,11 @@ export default function Resurrection({ gameState }) {
                                     className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${isRes && resurrectionCalculated ? 'bg-teal-900/50 shadow-md border-teal-500' : 'bg-[var(--color-card-bg)] border-[var(--color-card-border)]'
                                         }`}
                                 >
-                                    <div className="flex items-center space-x-4">
-                                        <span className={`font-black font-mono w-6 text-center ${idx < 10 && !resurrectionCalculated ? 'text-teal-400' : 'text-slate-500'}`}>{idx + 1}</span>
-                                        <img src={getFullAvatarUrl(p.avatar)} alt={p.name} className="w-12 h-12 rounded-full border border-slate-600 object-cover" />
+                                    <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm border border-white/10 rounded-full px-2 py-1 shadow-inner">
+                                        <span className={`font-black font-mono w-6 text-center flex-shrink-0 ${idx < 10 && !resurrectionCalculated ? 'text-teal-400' : 'text-slate-500'}`}>{idx + 1}</span>
+                                    <div className="rounded-full p-[1px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.4)] flex-shrink-0">
+                                        <img src={getFullAvatarUrl(p.avatar)} alt={p.name} className="w-10 h-10 rounded-full border border-white/15 object-cover block" />
+                                    </div>
                                         <span className="font-bold text-lg">{p.name}</span>
                                     </div>
                                     <div className="flex flex-col items-end">
@@ -97,7 +99,9 @@ export default function Resurrection({ gameState }) {
                                         {idx + 1}
                                     </div>
 
-                                    <img src={getFullAvatarUrl(p.avatar)} alt={p.name} className="w-28 h-28 rounded-full border-4 object-cover mt-2 shadow-sm border-slate-700/50" />
+                                    <div className="rounded-full p-[2px] bg-gradient-to-b from-white/35 to-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] mt-2">
+                                        <img src={getFullAvatarUrl(p.avatar)} alt={p.name} className="w-28 h-28 rounded-full border-2 border-white/15 object-cover block" />
+                                    </div>
                                     <h3 className="mt-4 font-black hidden text-xl truncate w-full text-center sm:block">{p.name}</h3>
                                     <div className="mt-2 flex space-x-2">
                                         {p.status === 'advanced' && <span className="bg-emerald-600 text-[10px] px-2 py-1 rounded-sm text-emerald-100 font-bold tracking-widest">直接晋级</span>}

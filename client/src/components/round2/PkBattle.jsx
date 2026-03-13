@@ -4,8 +4,9 @@ import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function PkBattle({ gameState }) {
     const pkMatches = gameState.pkMatches || [];
-    // 查找最新触发过 active 或者是 finished 的最新一条
-    const activeMatch = [...pkMatches].reverse().find(m => m.status === 'active' || m.status === 'finished');
+    // 使用 screenMatchIndex 精确选择大屏展示的对战，该字段由管理后台独立控制
+    const screenIdx = gameState.screenMatchIndex ?? 0;
+    const activeMatch = pkMatches[screenIdx] || null;
 
     if (!activeMatch) {
         return <div className="text-center mt-32 text-6xl text-slate-700 font-bold loading-dots">16强对战初始化中...</div>;
@@ -82,7 +83,9 @@ export default function PkBattle({ gameState }) {
                 >
                     <div className="absolute top-0 w-full h-2 bg-teal-500"></div>
                     <div className="absolute top-4 left-4 bg-teal-600 text-white px-3 py-1 rounded text-sm font-bold tracking-widest shadow-md">挑战者</div>
-                    <img src={getFullAvatarUrl(cInfo?.avatar)} alt={cInfo?.name} className="w-56 h-56 rounded-full border-[6px] border-teal-400/80 mt-6 object-cover shadow-[0_4px_20px_rgba(20,184,166,0.3)]" />
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(20,184,166,0.25)] mt-6">
+                        <img src={getFullAvatarUrl(cInfo?.avatar)} alt={cInfo?.name} className="w-56 h-56 rounded-full border-[3px] border-teal-400/50 object-cover block" />
+                    </div>
                     <h3 className="text-5xl font-black mt-8 tracking-wider">{cInfo?.name || "未知选手"}</h3>
 
                     <div className="mt-8 text-center min-h-[120px] flex items-center justify-center w-full">
@@ -132,7 +135,9 @@ export default function PkBattle({ gameState }) {
                 >
                     <div className="absolute top-0 w-full h-2 bg-emerald-500"></div>
                     <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded text-sm font-bold tracking-widest shadow-md">擂主</div>
-                    <img src={getFullAvatarUrl(mInfo?.avatar)} alt={mInfo?.name} className="w-56 h-56 rounded-full border-[6px] border-emerald-400/80 mt-6 object-cover shadow-[0_4px_20px_rgba(16,185,129,0.3)]" />
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.25)] mt-6">
+                        <img src={getFullAvatarUrl(mInfo?.avatar)} alt={mInfo?.name} className="w-56 h-56 rounded-full border-[3px] border-emerald-400/50 object-cover block" />
+                    </div>
                     <h3 className="text-5xl font-black mt-8 tracking-wider">{mInfo?.name || "未知擂主"}</h3>
 
                     <div className="mt-8 text-center min-h-[120px] flex items-center justify-center w-full">

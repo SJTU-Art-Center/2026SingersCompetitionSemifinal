@@ -160,10 +160,10 @@ export default function PlayerManager({ gameState, updateState }) {
                 <div className="lg:col-span-3">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 h-[450px] overflow-y-auto custom-scrollbar pr-2">
                         {gameState.players.map(p => (
-                            <div key={p.id} className="bg-slate-900 border border-slate-700 rounded-lg p-3 flex flex-col items-center relative">
-                                <img src={getFullAvatarUrl(p.avatar)} alt="avatar" className="w-[84px] h-[84px] rounded-full mb-3 object-cover border-2 border-slate-600 shadow-lg" />
+                            <div key={p.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-3 flex flex-col items-center relative shadow-inner hover:bg-white/10 transition-colors">
+                                <img src={getFullAvatarUrl(p.avatar)} alt="avatar" className="w-[84px] h-[84px] rounded-full mb-3 object-cover border-2 border-white/20 shadow-lg" />
                                 <div className="absolute top-1 right-1 bg-slate-800 border border-slate-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold text-teal-400 opacity-80 z-10">{p.group || 1}</div>
-                                <div className="text-sm font-bold text-slate-300 truncate w-full text-center pb-2 border-b border-slate-700/50 mb-2">{p.name}</div>
+                                <div className="text-sm font-bold text-slate-300 truncate w-full text-center pb-2 border-b border-white/10 mb-2">{p.name}</div>
                                 <button
                                     onClick={() => handleEdit(p)}
                                     className="mt-1 text-sm font-bold bg-slate-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg w-full transition-colors flex justify-center items-center"

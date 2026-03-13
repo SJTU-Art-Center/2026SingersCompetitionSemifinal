@@ -1,0 +1,33 @@
+/* Theme: Gold (black-gold luxury) */
+.theme-gold {
+  --color-bg-base: #0a0a0a;
+  --color-bg-screen: #000000;
+  --color-text-main: #fdf6e3;
+  --color-text-muted: #d4af37;
+  --color-card-bg: rgba(20, 20, 20, 0.85);
+  --color-card-border: rgba(212, 175, 55, 0.4);
+  --color-glow-1: rgba(212, 175, 55, 0.15);
+  --color-glow-2: rgba(138, 108, 28, 0.15);
+  --title-gradient-from: #fde047;
+  --title-gradient-to: #d4af37;
+
+  --rank-king-bg: linear-gradient(to right, #27272a, #000000);
+  --rank-king-border: #facc15;
+  --rank-king-shadow: 0 0 20px rgba(250, 204, 21, 0.5);
+  --rank-king-text: #fde047;
+
+  --rank-master-bg: linear-gradient(to right, #18181b, #000000);
+  --rank-master-border: #a1a1aa;
+  --rank-master-shadow: 0 0 15px rgba(161, 161, 170, 0.3);
+  --rank-master-text: #e4e4e7;
+
+  --rank-challenger-bg: linear-gradient(to right, #09090b, #000000);
+  --rank-challenger-border: #52525b;
+  --rank-challenger-shadow: 0 0 10px rgba(82, 82, 91, 0.2);
+  --rank-challenger-text: #a1a1aa;
+
+  --rank-eliminated-bg: #000000;
+  --rank-eliminated-border: #27272a;
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #52525b;
+}
