@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 
@@ -17,6 +17,9 @@ export default function PkBattle({ gameState }) {
 
     const isFinished = activeMatch.status === 'finished';
     const winner = activeMatch.winner; // 'master', 'both_pending'
+    const isMasterWin = winner === 'master';
+    const isBothPending = winner === 'both_pending';
+    const pairResultText = isMasterWin ? '晋级 & 淘汰' : isBothPending ? '待定 & 待定' : '结果待确认';
 
     // Animation variants
     const getCardVariant = (role) => {
@@ -62,7 +65,7 @@ export default function PkBattle({ gameState }) {
         <div className="flex flex-col items-center justify-center w-full min-h-[600px] mt-2 relative">
             {/* 晋级全屏光晕 */}
             <AnimatePresence>
-                {isFinished && winner === 'master' && (
+                {isFinished && isMasterWin && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 0.15, scale: 2 }}
@@ -71,9 +74,32 @@ export default function PkBattle({ gameState }) {
                         className="absolute inset-0 bg-emerald-500 rounded-full blur-[100px] pointer-events-none -z-10 right-[-30%]"
                     />
                 )}
+                {isFinished && isBothPending && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 0.2, scale: 2 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.2 }}
+                        className="absolute inset-0 bg-cyan-500 rounded-full blur-[100px] pointer-events-none -z-10"
+                    />
+                )}
             </AnimatePresence>
 
             <h2 className="text-5xl font-black mb-16 text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 tracking-[0.5em] italic">1V1 BATTLE</h2>
+
+            <AnimatePresence>
+                {isFinished && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 140, damping: 12 }}
+                        className={`mb-10 px-10 py-3 rounded-2xl border-2 text-4xl font-black tracking-widest ${isMasterWin ? 'bg-emerald-600/30 border-emerald-400 text-emerald-100 shadow-[0_0_25px_rgba(16,185,129,0.5)]' : isBothPending ? 'bg-cyan-700/30 border-cyan-300 text-cyan-100 shadow-[0_0_25px_rgba(34,211,238,0.45)]' : 'bg-amber-700/30 border-amber-300 text-amber-100 shadow-[0_0_25px_rgba(245,158,11,0.45)]'}`}
+                    >
+                        结果：{pairResultText}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="flex items-center justify-center space-x-20 w-full relative z-10">
                 {/* 挑战者卡片 */}
@@ -94,7 +120,7 @@ export default function PkBattle({ gameState }) {
                                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ type: 'spring', damping: 10, stiffness: 100 }}
-                                className={`text-[5.5rem] leading-none font-mono font-black ${winner === 'master' ? 'text-slate-500' : 'text-transparent bg-clip-text bg-gradient-to-b from-white to-teal-300'}`}
+                                className={`text-[5.5rem] leading-none font-mono font-black ${isMasterWin ? 'text-slate-500' : 'text-transparent bg-clip-text bg-gradient-to-b from-white to-teal-300'}`}
                             >
                                 {activeMatch.challengerScore?.toFixed(2)}
                             </motion.div>
@@ -108,9 +134,9 @@ export default function PkBattle({ gameState }) {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className={`w-full mt-6 py-4 text-center text-3xl font-black tracking-widest text-white rounded-xl shadow-md border-2 ${winner === 'both_pending' ? 'bg-slate-700 border-slate-500 text-teal-200' : 'bg-slate-800 border-slate-700 text-slate-500'}`}
+                                className={`w-full mt-6 py-4 text-center text-3xl font-black tracking-widest text-white rounded-xl shadow-md border-2 ${isBothPending ? 'bg-slate-700 border-slate-500 text-teal-200' : isMasterWin ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-amber-800/60 border-amber-500 text-amber-100'}`}
                             >
-                                {winner === 'both_pending' ? '🛡️ 落入待定区' : '❌ 淘 汰'}
+                                {isBothPending ? '🛡️ 待定池' : isMasterWin ? '❌ 直接淘汰' : '⚠️ 结果待确认'}
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -146,7 +172,7 @@ export default function PkBattle({ gameState }) {
                                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ type: 'spring', damping: 10, stiffness: 100, delay: 0.1 }}
-                                className={`text-[5.5rem] leading-none font-mono font-black ${winner === 'master' ? 'text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-300' : 'text-slate-400'}`}
+                                className={`text-[5.5rem] leading-none font-mono font-black ${isMasterWin ? 'text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-300' : 'text-slate-400'}`}
                             >
                                 {activeMatch.masterScore?.toFixed(2)}
                             </motion.div>
@@ -160,9 +186,9 @@ export default function PkBattle({ gameState }) {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className={`w-full mt-6 py-4 text-center text-3xl font-black tracking-widest text-white rounded-xl shadow-md border-2 ${winner === 'both_pending' ? 'bg-slate-700 border-slate-500 text-teal-200' : 'bg-emerald-600 border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.4)]'}`}
+                                className={`w-full mt-6 py-4 text-center text-3xl font-black tracking-widest text-white rounded-xl shadow-md border-2 ${isBothPending ? 'bg-slate-700 border-slate-500 text-teal-200' : isMasterWin ? 'bg-emerald-600 border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.4)]' : 'bg-amber-800/60 border-amber-500 text-amber-100'}`}
                             >
-                                {winner === 'both_pending' ? '🛡️ 落入待定区' : '🏆 守擂成功晋级'}
+                                {isBothPending ? '🛡️ 待定池' : isMasterWin ? '🏆 直接晋级十强' : '⚠️ 结果待确认'}
                             </motion.div>
                         )}
                     </AnimatePresence>

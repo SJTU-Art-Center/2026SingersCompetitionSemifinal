@@ -8,9 +8,17 @@ import PickOpponent from '../components/transition/PickOpponent';
 import GroupIntro from '../components/round1/GroupIntro';
 
 export default function Screen() {
-    const { gameState } = useGameState();
+    const { gameState, connectionError, activeServerUrl } = useGameState();
 
-    if (!gameState) return <div className="flex items-center justify-center min-h-screen text-4xl font-black bg-[var(--color-bg-base)] text-[var(--color-text-muted)] tracking-widest animate-pulse">连接总控制台...</div>;
+    if (!gameState) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen text-4xl font-black bg-[var(--color-bg-base)] text-[var(--color-text-muted)] tracking-widest gap-4">
+                <div className="animate-pulse">连接总控制台...</div>
+                {connectionError && <div className="text-sm text-red-300 bg-red-900/30 border border-red-600/40 px-4 py-2 rounded-xl tracking-normal">{connectionError}</div>}
+                {activeServerUrl && <div className="text-xs text-slate-400 font-mono tracking-normal">已连接：{activeServerUrl}</div>}
+            </div>
+        );
+    }
 
     const themeClass = gameState.theme || 'theme-dark';
 

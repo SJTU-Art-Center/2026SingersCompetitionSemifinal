@@ -8,12 +8,20 @@ import AdminPickOpponent from '../components/transition/AdminPickOpponent';
 import PlayerManager from '../components/PlayerManager';
 
 export default function Admin() {
-    const { gameState, updateState } = useGameState();
+    const { gameState, updateState, connectionError, activeServerUrl } = useGameState();
     const [adminMatchIndex, setAdminMatchIndex] = useState(0);
     const [adminGroup, setAdminGroup] = useState(gameState?.currentGroup || 1);
     const [adminRound1Mode, setAdminRound1Mode] = useState(gameState?.round1Mode || 'group');
 
-    if (!gameState) return <div className="p-8 text-white flex justify-center items-center min-h-screen text-2xl font-bold bg-slate-900">连接服务器中...</div>;
+    if (!gameState) {
+        return (
+            <div className="p-8 text-white flex flex-col justify-center items-center min-h-screen text-2xl font-bold bg-slate-900 gap-4">
+                <div className="animate-pulse">连接服务器中...</div>
+                {connectionError && <div className="text-sm text-red-300 bg-red-900/30 border border-red-600/40 px-4 py-2 rounded-xl">{connectionError}</div>}
+                {activeServerUrl && <div className="text-xs text-slate-400 font-mono">已连接：{activeServerUrl}</div>}
+            </div>
+        );
+    }
 
     const currentTheme = gameState.theme || 'theme-dark';
 
