@@ -8,19 +8,17 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
     const [cScore, setCScore] = useState('');
     const [mScore, setMScore] = useState('');
 
-    const syncScreenToMatch = (index, nextMatches = pkMatches) => {
+    const syncScreenToMatch = (index) => {
         updateState({
             ...gameState,
             screenRound: 2,
-            screenMatchIndex: index,
-            pkMatches: nextMatches
+            screenMatchIndex: index
         });
     };
 
     const handleSelectMatch = (index) => {
         const match = pkMatches[index];
         setAdminMatchIndex(index);
-        syncScreenToMatch(index);
         if (match?.status === 'finished') {
             setCScore(match.challengerScore?.toString() || '');
             setMScore(match.masterScore?.toString() || '');
@@ -35,9 +33,14 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         newMatches.forEach(m => { if (m.status === 'active') m.status = 'finished'; });
         newMatches[index].status = 'active';
         setAdminMatchIndex(index);
-        syncScreenToMatch(index, newMatches);
+        updateState({ ...gameState, pkMatches: newMatches });
         setCScore('');
         setMScore('');
+    };
+
+    const handleProjectSelectedMatch = () => {
+        if (!activeMatch) return;
+        syncScreenToMatch(activeMatchIndex);
     };
 
     const handleSubmitScore = () => {
@@ -71,8 +74,6 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         newMatches[activeMatchIndex] = { ...match, challengerScore: cs, masterScore: ms, winner, status: 'finished' };
         updateState({
             ...gameState,
-            screenRound: 2,
-            screenMatchIndex: activeMatchIndex,
             pkMatches: newMatches,
             players: newPlayersState
         });
@@ -176,6 +177,16 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                     <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
                     {activeMatch ? (
                         <div>
+                            <div className="mb-2">
+                                <button
+                                    onClick={handleProjectSelectedMatch}
+                                    className="w-full bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
+                                >📺 投屏当前对战</button>
+                                <div className="text-[10px] text-slate-400 text-center mt-1">
+                                    当前大屏：第 {(gameState.screenMatchIndex ?? 0) + 1} 场
+                                </div>
+                            </div>
+
                             {/* 两名选手信息 + 打分区并排 */}
                             <div className="flex gap-2 mb-2">
                                 {/* 挑战者 */}
@@ -230,7 +241,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                     <button
                                         onClick={handleEditFinishedScore}
                                         className="w-full bg-amber-700 hover:bg-amber-600 border border-amber-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
-                                    >保存修改并重新投屏</button>
+                                    >保存修改并重新结算</button>
                                 </div>
                             ) : isActive ? (
                                 <div className="flex flex-col gap-1.5">
