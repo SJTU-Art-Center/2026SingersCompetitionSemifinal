@@ -49,7 +49,7 @@ export default function DemonKing({ gameState }) {
                             filter: isFailed ? 'grayscale(60%)' : 'grayscale(0%)'
                         }}
                         transition={{ type: 'spring' }}
-                        className={`bg-transparent border-2 rounded-3xl px-[clamp(12px,1.7vw,20px)] pt-[clamp(10px,1.4vh,18px)] pb-[clamp(10px,1.4vh,16px)] flex flex-col items-center w-full overflow-hidden ${isSuccess ? 'border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.35)]' : (isFailed ? 'border-slate-500 shadow-[0_0_14px_rgba(34,211,238,0.25)]' : 'border-teal-500 shadow-lg')}`}
+                        className="bg-transparent px-[clamp(12px,1.7vw,20px)] pt-[clamp(10px,1.4vh,18px)] pb-[clamp(10px,1.4vh,16px)] flex flex-col items-center w-full"
                     >
                     <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.65),0_0_24px_rgba(20,184,166,0.18)] mt-[clamp(6px,1.1vh,12px)] mb-[clamp(8px,1.4vh,14px)]">
                         <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-[clamp(96px,11vw,128px)] h-[clamp(96px,11vw,128px)] rounded-full border-[3px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
