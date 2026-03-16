@@ -173,7 +173,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                 </div>
 
                 {/* 右侧：打分面板 */}
-                <div className="col-span-1 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
+                <div className="col-span-1 w-full min-w-0 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
                     <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
                     {activeMatch ? (
                         <div>
@@ -214,7 +214,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                     </div>
                                     <div className="text-[10px] text-slate-400 text-center">可按现场情况修改分数并重新结算</div>
                                     <div className="flex gap-1.5">
-                                        <div className="relative flex-1">
+                                        <div className="relative flex-1 min-w-0">
                                             <span className="absolute left-1.5 top-1.5 text-[9px] text-teal-400 font-bold leading-none">挑战<br/>者分</span>
                                             <input
                                                 type="number" step="0.01"
@@ -225,7 +225,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                                 onKeyDown={e => { if (e.key === 'Enter') document.getElementById('r2mScoreEdit')?.focus(); }}
                                             />
                                         </div>
-                                        <div className="relative flex-1">
+                                        <div className="relative flex-1 min-w-0">
                                             <span className="absolute left-1.5 top-1.5 text-[9px] text-emerald-400 font-bold leading-none">擂主<br/>分</span>
                                             <input
                                                 id="r2mScoreEdit"
@@ -246,7 +246,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                             ) : isActive ? (
                                 <div className="flex flex-col gap-1.5">
                                     <div className="flex gap-1.5">
-                                        <div className="relative flex-1">
+                                        <div className="relative flex-1 min-w-0">
                                             <span className="absolute left-1.5 top-1.5 text-[9px] text-teal-400 font-bold leading-none">挑战<br/>者分</span>
                                             <input
                                                 type="number" step="0.01"
@@ -257,7 +257,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                                 onKeyDown={e => { if (e.key === 'Enter') document.getElementById('r2mScore')?.focus(); }}
                                             />
                                         </div>
-                                        <div className="relative flex-1">
+                                        <div className="relative flex-1 min-w-0">
                                             <span className="absolute left-1.5 top-1.5 text-[9px] text-emerald-400 font-bold leading-none">擂主<br/>分</span>
                                             <input
                                                 id="r2mScore"

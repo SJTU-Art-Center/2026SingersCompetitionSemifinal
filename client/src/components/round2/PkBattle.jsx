@@ -62,8 +62,8 @@ export default function PkBattle({ gameState }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-end w-full h-full pt-1 pb-2 relative overflow-hidden">
-            <h2 className="text-4xl font-black mt-4 mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 tracking-[0.35em] italic">1V1 BATTLE</h2>
+        <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,1.2vh,16px)] pb-[clamp(8px,1.5vh,18px)] overflow-hidden">
+            <h2 className="text-[clamp(2rem,3.8vw,2.6rem)] font-black mt-[clamp(4px,1vh,14px)] mb-[clamp(6px,1.2vh,14px)] text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 tracking-[0.25em] italic">1V1 BATTLE</h2>
 
             <AnimatePresence>
                 {isFinished && (
@@ -72,27 +72,26 @@ export default function PkBattle({ gameState }) {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ type: 'spring', stiffness: 140, damping: 12 }}
-                        className={`mb-2 px-8 py-2.5 rounded-2xl border-2 text-3xl font-black tracking-[0.18em] ${isMasterWin ? 'bg-emerald-600/30 border-emerald-400 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.45)]' : isBothPending ? 'bg-cyan-700/30 border-cyan-300 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'bg-amber-700/30 border-amber-300 text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`}
+                        className={`mb-[clamp(6px,1.2vh,14px)] px-[clamp(18px,2.2vw,32px)] py-[clamp(6px,1vh,10px)] rounded-2xl border-2 text-[clamp(1.15rem,2.4vw,1.8rem)] font-black tracking-[0.14em] ${isMasterWin ? 'bg-emerald-600/30 border-emerald-400 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.45)]' : isBothPending ? 'bg-cyan-700/30 border-cyan-300 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'bg-amber-700/30 border-amber-300 text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`}
                     >
                         结果：{pairResultText}
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <div className="flex items-start justify-center gap-6 w-full max-w-[1060px] relative z-10 px-4 pb-2 mt-2 flex-wrap md:flex-nowrap">
+            <div className="w-full max-w-[1080px] px-[clamp(8px,1.2vw,16px)] pb-[clamp(4px,1vh,10px)] mt-[clamp(4px,1vh,10px)] grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start justify-items-center gap-[clamp(10px,1.8vw,24px)]">
                 {/* 挑战者卡片 */}
                 <motion.div
                     animate={getCardVariant('challenger')}
-                    className="bg-[var(--color-card-bg)] border-2 border-teal-500/50 rounded-3xl px-5 pt-5 pb-4 flex flex-col items-center w-[clamp(260px,29%,320px)] min-h-[400px] relative overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
+                    className="bg-[var(--color-card-bg)] border-2 border-teal-500/50 rounded-3xl px-[clamp(12px,1.6vw,20px)] pt-[clamp(10px,1.4vh,18px)] pb-[clamp(10px,1.4vh,16px)] flex flex-col items-center w-[clamp(240px,30vw,320px)] min-h-[clamp(330px,48vh,400px)] overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
                 >
-                    <div className="absolute top-0 w-full h-2 bg-teal-500"></div>
-                    <div className="absolute top-4 left-4 bg-teal-600 text-white px-3 py-1 rounded text-sm font-bold tracking-widest shadow-md">挑战者</div>
-                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(20,184,166,0.25)] mt-8">
+                    <div className="w-full bg-teal-500/85 text-white text-[clamp(0.65rem,1vw,0.8rem)] font-bold tracking-[0.2em] text-center rounded-md py-1">挑战者</div>
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(20,184,166,0.25)] mt-[clamp(8px,1.6vh,18px)]">
                         <img src={getFullAvatarUrl(cInfo?.avatar)} alt={cInfo?.name} className="w-36 h-36 rounded-full border-[3px] border-teal-400/50 object-cover block" />
                     </div>
-                    <h3 className="text-[clamp(1.3rem,2.2vw,1.8rem)] font-black mt-4 tracking-wide text-center leading-tight min-h-[64px] flex items-center justify-center">{cInfo?.name || "未知选手"}</h3>
+                    <h3 className="text-[clamp(1.15rem,2vw,1.7rem)] font-black mt-[clamp(8px,1.4vh,14px)] tracking-wide text-center leading-tight min-h-[56px] flex items-center justify-center">{cInfo?.name || "未知选手"}</h3>
 
-                    <div className="mt-4 text-center min-h-[84px] flex items-center justify-center w-full">
+                    <div className="mt-[clamp(6px,1vh,12px)] text-center min-h-[72px] flex items-center justify-center w-full">
                         {isFinished ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
@@ -127,7 +126,7 @@ export default function PkBattle({ gameState }) {
                         opacity: isFinished ? 0.3 : 1
                     }}
                     transition={{ type: 'spring' }}
-                    className="text-[clamp(2.6rem,5.2vw,4.6rem)] mt-4 md:mt-20 font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 to-emerald-700 italic drop-shadow-lg z-20"
+                    className="text-[clamp(2.2rem,4.8vw,4.2rem)] mt-[clamp(4px,1vh,10px)] md:mt-[clamp(26px,5vh,64px)] font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 to-emerald-700 italic drop-shadow-lg z-20"
                 >
                     VS
                 </motion.div>
@@ -135,16 +134,15 @@ export default function PkBattle({ gameState }) {
                 {/* 擂主卡片 */}
                 <motion.div
                     animate={getCardVariant('master')}
-                    className="bg-[var(--color-card-bg)] border-2 border-emerald-500/50 rounded-3xl px-5 pt-5 pb-4 flex flex-col items-center w-[clamp(260px,29%,320px)] min-h-[400px] relative overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
+                    className="bg-[var(--color-card-bg)] border-2 border-emerald-500/50 rounded-3xl px-[clamp(12px,1.6vw,20px)] pt-[clamp(10px,1.4vh,18px)] pb-[clamp(10px,1.4vh,16px)] flex flex-col items-center w-[clamp(240px,30vw,320px)] min-h-[clamp(330px,48vh,400px)] overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
                 >
-                    <div className="absolute top-0 w-full h-2 bg-emerald-500"></div>
-                    <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded text-sm font-bold tracking-widest shadow-md">擂主</div>
-                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.25)] mt-8">
+                    <div className="w-full bg-emerald-500/85 text-white text-[clamp(0.65rem,1vw,0.8rem)] font-bold tracking-[0.2em] text-center rounded-md py-1">擂主</div>
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.25)] mt-[clamp(8px,1.6vh,18px)]">
                         <img src={getFullAvatarUrl(mInfo?.avatar)} alt={mInfo?.name} className="w-36 h-36 rounded-full border-[3px] border-emerald-400/50 object-cover block" />
                     </div>
-                    <h3 className="text-[clamp(1.3rem,2.2vw,1.8rem)] font-black mt-4 tracking-wide text-center leading-tight min-h-[64px] flex items-center justify-center">{mInfo?.name || "未知擂主"}</h3>
+                    <h3 className="text-[clamp(1.15rem,2vw,1.7rem)] font-black mt-[clamp(8px,1.4vh,14px)] tracking-wide text-center leading-tight min-h-[56px] flex items-center justify-center">{mInfo?.name || "未知擂主"}</h3>
 
-                    <div className="mt-4 text-center min-h-[84px] flex items-center justify-center w-full">
+                    <div className="mt-[clamp(6px,1vh,12px)] text-center min-h-[72px] flex items-center justify-center w-full">
                         {isFinished ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
