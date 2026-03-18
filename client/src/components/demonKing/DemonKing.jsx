@@ -17,54 +17,45 @@ export default function DemonKing({ gameState }) {
     const isFailed = dkScoreSubmitted && finalScore < targetScore;
 
     return (
-        <div className="flex flex-col items-center justify-center w-full min-h-[600px] mt-10 relative">
-            {/* 晋级全屏光晕 */}
-            <AnimatePresence>
-                {isSuccess && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 0.2, scale: 2 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5 }}
-                        className="absolute inset-0 bg-emerald-500 rounded-full blur-[100px] pointer-events-none -z-10"
-                    />
-                )}
-            </AnimatePresence>
-
+        <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,1.2vh,14px)] pb-[clamp(8px,1.4vh,18px)] overflow-hidden">
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-6xl font-black mb-16 text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.5em] italic"
+                className="text-[clamp(2.05rem,4vw,2.8rem)] font-black mt-[clamp(18px,4vh,46px)] mb-[clamp(6px,1.3vh,14px)] text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.26em] italic"
             >
                 大魔王降临
             </motion.h2>
 
-            <div className="flex flex-col items-center justify-center w-full relative z-10 max-w-4xl">
-                <motion.div
-                    animate={{ scale: isSuccess ? 1.05 : 1, y: isSuccess ? -20 : (isFailed ? 20 : 0) }}
-                    transition={{ type: 'spring' }}
-                    className={`bg-[var(--color-card-bg)] border-4 rounded-[40px] p-12 flex flex-col items-center w-full relative overflow-hidden backdrop-blur-xl ${isSuccess ? 'border-emerald-400 shadow-[0_4px_30px_rgba(16,185,129,0.4)]' : (isFailed ? 'border-slate-600 grayscale brightness-75' : 'border-teal-500 shadow-lg')}`}
-                >
-                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.7),0_0_30px_rgba(20,184,166,0.2)] mt-4 mb-8">
-                        <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-64 h-64 rounded-full border-[4px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
+            <div className="w-full flex-1 min-h-0 relative z-10 flex items-center justify-center overflow-hidden">
+                <div className="w-full max-w-[clamp(520px,62vw,680px)]">
+                    <motion.div
+                        animate={{
+                            scale: isSuccess ? 1.03 : (isFailed ? 0.9 : 1),
+                            y: isSuccess ? -8 : 0,
+                            opacity: isFailed ? 0.9 : 1,
+                            filter: isFailed ? 'grayscale(60%)' : 'grayscale(0%)'
+                        }}
+                        transition={{ type: 'spring' }}
+                        className={`bg-transparent border-2 rounded-3xl px-[clamp(12px,1.7vw,20px)] pt-[clamp(10px,1.4vh,18px)] pb-[clamp(10px,1.4vh,16px)] flex flex-col items-center w-full overflow-hidden ${isSuccess ? 'border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.35)]' : (isFailed ? 'border-slate-500 shadow-[0_0_14px_rgba(34,211,238,0.25)]' : 'border-teal-500 shadow-lg')}`}
+                    >
+                    <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.65),0_0_24px_rgba(20,184,166,0.18)] mt-[clamp(6px,1.1vh,12px)] mb-[clamp(8px,1.4vh,14px)]">
+                        <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-[clamp(96px,11vw,128px)] h-[clamp(96px,11vw,128px)] rounded-full border-[3px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
                     </div>
-                    <h3 className="text-6xl font-black tracking-widest">{dk.name}</h3>
+                    <h3 className="text-[clamp(1.15rem,2.1vw,1.7rem)] font-black tracking-wide text-center">{dk.name}</h3>
 
-                    <div className="w-full mt-16 px-12 relative flex flex-col items-center">
-                        {/* 目标均分指示线 */}
-                        <div className="absolute top-0 right-16 flex flex-col items-end">
-                            <div className="text-teal-400 font-bold text-2xl mb-2 flex items-center">
+                    <div className="w-full mt-[clamp(8px,1.4vh,14px)] px-[clamp(4px,0.8vw,10px)] flex flex-col items-center">
+                        <div className="w-full flex flex-col items-end">
+                            <div className="text-teal-400 font-bold text-[clamp(0.72rem,1vw,0.9rem)] mb-1 flex items-center">
                                 <span className="mr-2">🏆 及格线 (16人均分)</span>
-                                <span className="font-mono text-3xl">{targetScore.toFixed(3)}</span>
+                                <span className="font-mono text-[clamp(0.95rem,1.4vw,1.2rem)]">{targetScore.toFixed(3)}</span>
                             </div>
-                            <div className="w-[800px] h-[3px] bg-teal-500 relative">
-                                <div className="absolute top-[-5px] right-0 w-3 h-3 bg-teal-400 rounded-full shadow-md"></div>
+                            <div className="w-full h-[2px] bg-teal-500/80 relative">
+                                <div className="absolute top-[-4px] right-0 w-2.5 h-2.5 bg-teal-400 rounded-full shadow-md"></div>
                             </div>
                         </div>
 
-                        <div className="mt-20 w-full flex justify-center pb-8 border-b-2 border-slate-700">
-                            {/* 动态分数跳动 */}
-                            <div className="text-[8rem] leading-none font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+                        <div className="mt-[clamp(8px,1.4vh,14px)] w-full flex justify-center pb-[clamp(8px,1.2vh,14px)] border-b border-slate-700/80">
+                            <div className="text-[clamp(1.9rem,4.2vw,3.7rem)] leading-none font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
                                 {dkScoreSubmitted ? (
                                     <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} />
                                 ) : (
@@ -79,14 +70,15 @@ export default function DemonKing({ gameState }) {
                                     initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ delay: 1.5, type: 'spring' }}
-                                    className={`w-[80%] mt-12 py-6 text-center text-5xl font-black tracking-widest text-white rounded-2xl shadow-lg border-4 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-slate-300'}`}
+                                    className={`w-[88%] mt-[clamp(8px,1.2vh,14px)] py-[clamp(8px,1.2vh,12px)] text-center text-[clamp(0.9rem,1.7vw,1.45rem)] font-black tracking-[0.08em] text-white rounded-xl shadow-lg border-2 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-teal-200'}`}
                                 >
                                     {isSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
-                </motion.div>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );

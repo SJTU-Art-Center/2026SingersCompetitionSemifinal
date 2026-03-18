@@ -105,12 +105,12 @@ export default function AdminRound3({ gameState, updateState }) {
                 </div>
 
                 {/* 右侧：打分面板 */}
-                <div className="col-span-1 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
+                <div className="col-span-1 w-full min-w-0 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
                     <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
                     {selectedDK ? (
                         <div>
                             <div className="flex gap-3 items-center mb-3">
-                                <div className="flex flex-col items-center flex-shrink-0">
+                                <div className="flex flex-col items-center flex-shrink-0 w-16">
                                     <img src={getFullAvatarUrl(selectedDK.avatar)} alt="avatar" className="w-12 h-12 rounded-full border-2 border-teal-500 object-cover shadow" />
                                     <div className="text-sm font-black mt-1 text-white text-center">{selectedDK.name}</div>
                                     {selectedDK.scoreDK > 0 ? (
@@ -121,7 +121,7 @@ export default function AdminRound3({ gameState, updateState }) {
                                         <div className="text-[10px] text-slate-500">未打分</div>
                                     )}
                                 </div>
-                                <div className="flex-1 flex flex-col gap-1.5">
+                                <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                                     <div className="relative">
                                         <span className="absolute left-2 top-1.5 text-[10px] text-slate-400 font-bold leading-none">返场<br/>得分</span>
                                         <input
