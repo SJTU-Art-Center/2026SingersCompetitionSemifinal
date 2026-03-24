@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminPickOpponent({ gameState, updateState }) {
+    const transitionStages = [
+        { value: 1, label: 'Stage 1 · 30人上屏' },
+        { value: 2, label: 'Stage 2 · 后12名显色淡出' },
+        { value: 3, label: 'Stage 3 · 排名双列重排' },
+        { value: 4, label: 'Stage 4 · 大魔王聚焦' },
+        { value: 5, label: 'Stage 5 · 挑战者迁移' }
+    ];
+
     const sortedPlayers = [...gameState.players].sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
         return a.id - b.id;
@@ -10,6 +18,9 @@ export default function AdminPickOpponent({ gameState, updateState }) {
     // Masters 3-10, Challengers 11-18
     const masters = sortedPlayers.slice(2, 10);
     const challengers = sortedPlayers.slice(10, 18);
+    const editStage = Number(gameState.transitionStage ?? 1);
+    const screenStage = Number(gameState.screenTransitionStage ?? editStage);
+    const hasCountMismatch = gameState.players.length !== 30 || masters.length !== 8 || challengers.length !== 8;
 
     const pkMatches = gameState.pkMatches || [];
 
@@ -45,6 +56,14 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         updateState({ ...gameState, pickingChallengerId: null });
     };
 
+    const handleChangeEditStage = (stage) => {
+        updateState({ ...gameState, transitionStage: stage });
+    };
+
+    const handleProjectStage = (stage) => {
+        updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage });
+    };
+
     const handleSeedData = () => {
         if (!window.confirm('⚠️ 一键填入测试配对？\n将自动把挑战者和守播区选手一一配对，覆盖现有配对列表。')) return;
         const newMatches = challengers.map((c, i) => ({
@@ -71,16 +90,60 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                         🧪 填入测试配对
                     </button>
                     <button
-                        onClick={() => updateState({ ...gameState, screenRound: 1.5 })}
+                        onClick={() => handleProjectStage(editStage)}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-colors"
                     >
-                        📺 投屏展示挑选环节
+                        📺 手动投屏当前Stage
                     </button>
                     <button
                         onClick={handleClearPicking}
                         className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
                     >
                         清除大屏选中状态
+                    </button>
+                </div>
+            </div>
+
+            {hasCountMismatch && (
+                <div className="mb-5 bg-amber-900/40 border border-amber-600/60 text-amber-200 rounded-xl px-4 py-3 text-sm font-bold">
+                    ⚠️ 警告：当前数量与原始代码假设(总30人、擂主8人、挑战者8人)不一致，请先核对第一轮数据。
+                </div>
+            )}
+
+            <div className="mb-6 bg-slate-900 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-bold text-slate-300">过渡动画阶段控制</div>
+                    <div className="text-xs font-bold text-slate-400">✏️ 编辑 Stage {editStage} / 📺 播放 Stage {screenStage}</div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+                    {transitionStages.map((stage) => (
+                        <button
+                            key={stage.value}
+                            onClick={() => handleChangeEditStage(stage.value)}
+                            className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${editStage === stage.value ? 'bg-teal-600 text-white border-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700'}`}
+                        >
+                            {stage.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                        onClick={() => handleProjectStage(Math.max(1, editStage - 1))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
+                    >
+                        ◀ 投屏上一步
+                    </button>
+                    <button
+                        onClick={() => handleProjectStage(editStage)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white"
+                    >
+                        📺 投屏当前编辑Stage
+                    </button>
+                    <button
+                        onClick={() => handleProjectStage(Math.min(5, editStage + 1))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
+                    >
+                        投屏下一步 ▶
                     </button>
                 </div>
             </div>

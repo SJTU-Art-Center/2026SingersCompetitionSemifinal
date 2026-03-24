@@ -21,6 +21,19 @@ export default function Screen() {
     }
 
     const themeClass = gameState.theme || 'theme-dark';
+    const screenSubtitle = (() => {
+        if (gameState.screenRound === 0) return 'PREPARATION : 赛前准备部署中';
+        if (gameState.screenRound === 1) {
+            if (gameState.round1Mode === 'groupIntro') return 'ROUND 1 : 分组介绍';
+            if (gameState.round1Mode === 'group') return `ROUND 1 : 第 ${gameState.currentGroup || 1} 组`;
+            return 'ROUND 1 : 三十强排位赛';
+        }
+        if (gameState.screenRound === 1.5) return 'SELECTION : 对手挑选环节';
+        if (gameState.screenRound === 2) return 'ROUND 2 : 十六强对战赛';
+        if (gameState.screenRound === 3) return 'EXTRA ROUND : 大魔王返场';
+        if (gameState.screenRound === 4) return 'FINAL ROUND : 十强终极补位';
+        return '';
+    })();
 
     return (
         <div className="w-screen h-screen flex items-center justify-center overflow-hidden bg-black">
@@ -34,14 +47,8 @@ export default function Screen() {
                         <h1 className="text-5xl font-black tracking-widest text-transparent bg-clip-text bg-[linear-gradient(to_bottom,var(--title-gradient-from),var(--title-gradient-to))] text-shadow-glow drop-shadow-2xl italic transition-all duration-500">
                             SUPER SINGER
                         </h1>
-                        <p className="text-xl mt-2 font-bold text-[var(--color-text-muted)] tracking-[0.14em] uppercase border-l-4 border-emerald-500 pl-3 max-w-[75%]">
-                            {gameState.screenRound === 0 && 'PREPARATION : 赛前准备部署中'}
-                            {gameState.screenRound === 1 && 'ROUND 1 : 三十强排位赛'}
-                            {gameState.screenRound === 1 && gameState.round1Mode === 'groupIntro' && 'ROUND 1 : 分组介绍'}
-                            {gameState.screenRound === 1.5 && 'SELECTION : 对手挑选环节'}
-                            {gameState.screenRound === 2 && 'ROUND 2 : 十六强对战赛'}
-                            {gameState.screenRound === 3 && 'EXTRA ROUND : 大魔王返场'}
-                            {gameState.screenRound === 4 && 'FINAL ROUND : 十强终极补位'}
+                        <p className={`text-xl mt-2 font-bold text-[var(--color-text-muted)] tracking-[0.14em] uppercase border-l-4 border-emerald-500 pl-3 max-w-[75%] ${gameState.screenRound === 1.5 ? 'opacity-0 h-0 mt-0 overflow-hidden' : ''}`}>
+                            {screenSubtitle}
                         </p>
                     </div>
 
