@@ -59,7 +59,7 @@ export default function DemonKing({ gameState }) {
                                 {dkScoreSubmitted ? (
                                     <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} />
                                 ) : (
-                                    <span className="text-slate-600 opacity-50">0.000</span>
+                                    <span className="text-3xl text-teal-300 font-bold opacity-60 animate-pulse">演唱中...</span>
                                 )}
                             </div>
                         </div>
