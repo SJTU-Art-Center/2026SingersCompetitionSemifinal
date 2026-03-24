@@ -58,6 +58,7 @@ function initData() {
       screenRound: 0, // 大屏当前比赛轮次
       currentGroup: 1, // 第一轮当前展示/打分的组别
       pickingChallengerId: null, // 正在挑选对手的挑战者ID
+      round1RevealTick: 0,
       players: Array.from({ length: 30 }).map((_, i) => ({
         id: i + 1,
         name: `选手 ${i + 1}`,
@@ -70,6 +71,8 @@ function initData() {
       pkMatches: [], // {p1, p2, winner}
       demonKingScore: 0,
       screenMatchIndex: 0, // 第二轮: 大屏正在展示的PK对战索引
+      transitionStage: 1,
+      screenTransitionStage: 1,
       finalStageIndex: 1,
       screenFinalStageIndex: 1,
     };

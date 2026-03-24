@@ -61,6 +61,10 @@ export default function Admin() {
             const ms = m ? gameState.players.find(p => p.id === m.masterId)?.name : null;
             return `第二轮【第${idx + 1}场${c && ms ? ` ${c}vs${ms}` : ''}】`;
         }
+        if (sr === 1.5) {
+            const stage = Number(gameState.screenTransitionStage ?? gameState.transitionStage ?? 1);
+            return `过渡阶段【Stage ${stage}】`;
+        }
         if (sr === 4) {
             const stage = Number(gameState.screenFinalStageIndex ?? gameState.finalStageIndex ?? 1);
             return `终极补位【Stage ${stage} · ${finalStageLabels[stage] || '最终阵容'}】`;
@@ -91,7 +95,17 @@ export default function Admin() {
                             onClick={() => {
                                 if (gameState.adminRound === 1) {
                                     // R1: also commit the currently editing group/mode to screen
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
+                                    const revealTick = Number(gameState.round1RevealTick ?? 0) + 1;
+                                    updateState({
+                                        ...gameState,
+                                        screenRound: gameState.adminRound,
+                                        currentGroup: adminGroup,
+                                        round1Mode: adminRound1Mode,
+                                        round1RevealTick: revealTick
+                                    });
+                                } else if (gameState.adminRound === 1.5) {
+                                    const stage = Number(gameState.transitionStage ?? 1);
+                                    updateState({ ...gameState, screenRound: 1.5, screenTransitionStage: stage, transitionStage: stage });
                                 } else if (gameState.adminRound === 2) {
                                     updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
                                 } else if (gameState.adminRound === 4) {
@@ -181,24 +195,6 @@ export default function Admin() {
                                     第 {g} 组
                                 </button>
                             ))}
-                        </div>
-                    )}
-
-                    {/* Round 1.5 transition: broadcast picking phase */}
-                    {gameState.adminRound === 1.5 && (
-                        <div className="flex flex-wrap gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl">
-                            <button
-                                onClick={() => updateState({ ...gameState, screenRound: 1.5 })}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-colors"
-                            >
-                                📺 投屏展示挑选环节
-                            </button>
-                            <button
-                                onClick={() => updateState({ ...gameState, pickingChallengerId: null })}
-                                className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                            >
-                                清除大屏选中状态
-                            </button>
                         </div>
                     )}
 

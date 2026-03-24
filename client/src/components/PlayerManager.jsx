@@ -123,6 +123,7 @@ export default function PlayerManager({ gameState, updateState }) {
                 screenRound: 0,
                 currentGroup: 1,
                 pickingChallengerId: null,
+                round1RevealTick: 0,
                 players: gameState.players.map(p => ({
                     ...p,
                     score: 0,
@@ -136,6 +137,8 @@ export default function PlayerManager({ gameState, updateState }) {
                 demonKingAvgScore: 0,
                 dkScoreSubmitted: false,
                 resurrectionCalculated: false,
+                transitionStage: 1,
+                screenTransitionStage: 1,
                 finalStageIndex: 1,
                 screenFinalStageIndex: 1
             };
