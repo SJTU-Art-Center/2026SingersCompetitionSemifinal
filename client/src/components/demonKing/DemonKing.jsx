@@ -3,7 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function DemonKing({ gameState }) {
-    const { activeDemonKingId, demonKingAvgScore, dkScoreSubmitted, players } = gameState;
+    const activeDemonKingId = gameState?.activeDemonKingId ?? null;
+    const players = Array.isArray(gameState?.players) ? gameState.players : [];
+    const rawTargetScore = Number(gameState?.demonKingAvgScore);
+    const targetScore = Number.isFinite(rawTargetScore) ? rawTargetScore : 0;
 
     const dk = players.find(p => p.id === activeDemonKingId);
 
@@ -11,10 +14,11 @@ export default function DemonKing({ gameState }) {
         return <div className="text-center mt-32 text-6xl text-slate-700 font-bold loading-dots">等待大魔王登场...</div>;
     }
 
-    const targetScore = parseFloat(demonKingAvgScore);
-    const finalScore = dkScoreSubmitted ? dk.scoreDK : 0;
-    const isSuccess = dkScoreSubmitted && finalScore >= targetScore;
-    const isFailed = dkScoreSubmitted && finalScore < targetScore;
+    const rawFinalScore = Number(dk.scoreDK);
+    const hasDkScore = Number.isFinite(rawFinalScore) && rawFinalScore > 0;
+    const finalScore = hasDkScore ? rawFinalScore : 0;
+    const isSuccess = hasDkScore && finalScore > targetScore;
+    const isFailed = hasDkScore && finalScore < targetScore;
 
     return (
         <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,1.2vh,14px)] pb-[clamp(8px,1.4vh,18px)] overflow-hidden">
@@ -56,7 +60,7 @@ export default function DemonKing({ gameState }) {
 
                         <div className="mt-[clamp(8px,1.4vh,14px)] w-full flex justify-center pb-[clamp(8px,1.2vh,14px)] border-b border-slate-700/80">
                             <div className="text-[clamp(1.9rem,4.2vw,3.7rem)] leading-none font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
-                                {dkScoreSubmitted ? (
+                                {hasDkScore ? (
                                     <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} />
                                 ) : (
                                     <span className="text-slate-600 opacity-50">0.000</span>
@@ -65,7 +69,7 @@ export default function DemonKing({ gameState }) {
                         </div>
 
                         <AnimatePresence>
-                            {dkScoreSubmitted && (
+                            {hasDkScore && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -95,7 +99,7 @@ function AnimatedScore({ value, target, isSuccess }) {
 
         let start = 0;
         const end = value;
-        const duration = 2500; // 长时间滚动营造紧张感
+        const duration = 1000;
         const startTime = performance.now();
 
         const tick = (now) => {

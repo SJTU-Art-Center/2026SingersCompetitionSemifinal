@@ -94,6 +94,13 @@ export default function Admin() {
                                     updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
                                 } else if (gameState.adminRound === 2) {
                                     updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
+                                } else if (gameState.adminRound === 3) {
+                                    const selectedId = gameState.selectedDemonKingId ?? gameState.activeDemonKingId ?? null;
+                                    updateState({
+                                        ...gameState,
+                                        screenRound: gameState.adminRound,
+                                        activeDemonKingId: selectedId
+                                    });
                                 } else if (gameState.adminRound === 4) {
                                     const stage = Number(gameState.finalStageIndex ?? 1);
                                     updateState({ ...gameState, screenRound: gameState.adminRound, screenFinalStageIndex: stage, finalStageIndex: stage, resurrectionCalculated: true });

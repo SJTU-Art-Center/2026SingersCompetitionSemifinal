@@ -132,6 +132,7 @@ export default function PlayerManager({ gameState, updateState }) {
                 })),
                 pkMatches: [],
                 demonKingScore: 0,
+                selectedDemonKingId: null,
                 activeDemonKingId: null,
                 demonKingAvgScore: 0,
                 dkScoreSubmitted: false,

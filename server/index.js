@@ -69,6 +69,10 @@ function initData() {
       })),
       pkMatches: [], // {p1, p2, winner}
       demonKingScore: 0,
+      selectedDemonKingId: null,
+      activeDemonKingId: null,
+      demonKingAvgScore: 0,
+      dkScoreSubmitted: false,
       screenMatchIndex: 0, // 第二轮: 大屏正在展示的PK对战索引
       finalStageIndex: 1,
       screenFinalStageIndex: 1,
