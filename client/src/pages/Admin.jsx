@@ -54,6 +54,67 @@ export default function Admin() {
         return phases[screenIdx]?.label;
     })();
 
+    const handleSyncToScreen = () => {
+        if (gameState.adminRound === 1) {
+            updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
+            return;
+        }
+
+        if (gameState.adminRound === 2) {
+            updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
+            return;
+        }
+
+        if (gameState.adminRound === 3) {
+            const sortedPlayers = [...(gameState.players || [])].sort((a, b) => b.score - a.score || a.id - b.id);
+            const demonKings = sortedPlayers.slice(0, 2);
+            const averageScore = (() => {
+                const pkMatches = gameState.pkMatches || [];
+                let totalPkScore = 0;
+                let pkPlayerCount = 0;
+                pkMatches.forEach(m => {
+                    if (m.status === 'finished') {
+                        totalPkScore += m.challengerScore + m.masterScore;
+                        pkPlayerCount += 2;
+                    }
+                });
+                return pkPlayerCount > 0 ? parseFloat((totalPkScore / pkPlayerCount).toFixed(3)) : 0;
+            })();
+
+            if (demonKings.length < 2) {
+                updateState({ ...gameState, screenRound: gameState.adminRound });
+                return;
+            }
+
+            const currentActiveId = gameState.activeDemonKingId;
+            const isCurrentValid = demonKings.some(p => p.id === currentActiveId);
+            const baseIndex = isCurrentValid ? demonKings.findIndex(p => p.id === currentActiveId) : 0;
+            const nextIndex = (baseIndex + 1) % demonKings.length;
+            const nextDemonKing = demonKings[nextIndex];
+
+            const projectedSnapshot = {
+                id: nextDemonKing.id,
+                name: nextDemonKing.name,
+                avatar: nextDemonKing.avatar,
+                scoreDK: nextDemonKing.scoreDK || 0,
+                status: nextDemonKing.status,
+                submitted: (nextDemonKing.scoreDK || 0) > 0
+            };
+
+            updateState({
+                ...gameState,
+                screenRound: 3,
+                activeDemonKingId: nextDemonKing.id,
+                demonKingAvgScore: averageScore,
+                projectedDemonKing: projectedSnapshot,
+                projectedDemonKingAvgScore: averageScore
+            });
+            return;
+        }
+
+        updateState({ ...gameState, screenRound: gameState.adminRound });
+    };
+
     return (
         <div className="min-h-screen text-white bg-slate-900 font-sans p-8">
             {/* Header */}
@@ -74,16 +135,7 @@ export default function Admin() {
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-base font-bold text-slate-300 border-l-4 border-teal-500 pl-3">比赛阶段控制</h2>
                         <button
-                            onClick={() => {
-                                if (gameState.adminRound === 1) {
-                                    // R1: also commit the currently editing group/mode to screen
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
-                                } else if (gameState.adminRound === 2) {
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
-                                } else {
-                                    updateState({ ...gameState, screenRound: gameState.adminRound });
-                                }
-                            }}
+                            onClick={handleSyncToScreen}
                             className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
                         >
                             📺 投屏

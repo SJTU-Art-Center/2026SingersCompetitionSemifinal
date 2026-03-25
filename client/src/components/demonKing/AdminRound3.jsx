@@ -25,30 +25,6 @@ export default function AdminRound3({ gameState, updateState }) {
         setScoreInput(dk && dk.scoreDK > 0 ? dk.scoreDK : '');
     };
 
-    const handleProjectSelected = () => {
-        if (!selectedDKId) return alert('请先选择一位大魔王');
-        const selected = gameState.players.find(p => p.id === selectedDKId);
-        if (!selected) return;
-
-        const projectedSnapshot = {
-            id: selected.id,
-            name: selected.name,
-            avatar: selected.avatar,
-            scoreDK: selected.scoreDK || 0,
-            status: selected.status,
-            submitted: (selected.scoreDK || 0) > 0
-        };
-
-        updateState({
-            ...gameState,
-            screenRound: 3,
-            activeDemonKingId: selectedDKId,
-            demonKingAvgScore: parseFloat(averageScore),
-            projectedDemonKing: projectedSnapshot,
-            projectedDemonKingAvgScore: parseFloat(averageScore)
-        });
-    };
-
     const handleSubmitScore = () => {
         if (!selectedDKId) return;
         const dkScore = parseFloat(scoreInput);
@@ -100,8 +76,6 @@ export default function AdminRound3({ gameState, updateState }) {
     };
 
     const selectedDK = gameState.players.find(p => p.id === selectedDKId);
-    const projectedDKName = gameState.projectedDemonKing?.name || gameState.players.find(p => p.id === gameState.activeDemonKingId)?.name;
-
     return (
         <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl">
             <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
@@ -153,16 +127,6 @@ export default function AdminRound3({ gameState, updateState }) {
                     <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
                     {selectedDK ? (
                         <div>
-                            <div className="mb-2">
-                                <button
-                                    onClick={handleProjectSelected}
-                                    className="w-full bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
-                                >📺 投屏当前大魔王</button>
-                                <div className="text-[10px] text-slate-400 text-center mt-1">
-                                    当前大屏：{projectedDKName || '未投屏'}
-                                </div>
-                            </div>
-
                             <div className="flex gap-3 items-center mb-3">
                                 <div className="flex flex-col items-center flex-shrink-0 w-16">
                                     <img src={getFullAvatarUrl(selectedDK.avatar)} alt="avatar" className="w-12 h-12 rounded-full border-2 border-teal-500 object-cover shadow" />
