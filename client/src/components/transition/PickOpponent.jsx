@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 export default function PickOpponent({ gameState }) {
     const { players, pickingChallengerId, pkMatches = [] } = gameState;
@@ -44,7 +45,12 @@ export default function PickOpponent({ gameState }) {
                                 <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5),0_0_12px_rgba(52,211,153,0.2)]">
                                     <img src={getFullAvatarUrl(master.avatar)} alt="" className="w-20 h-20 rounded-full border border-emerald-400/40 object-cover block" />
                                 </div>
-                                <div className="text-lg font-bold text-white mt-2">{master.name}</div>
+                                <PlayerIdentity
+                                    player={master}
+                                    className="mt-2"
+                                    numberClassName="text-[10px] text-slate-400"
+                                    nameClassName="text-lg font-bold text-white"
+                                />
                                 <div className="text-xs text-slate-400">排名: NO.{sortedPlayers.findIndex(x => x.id === master.id) + 1}</div>
 
                                 {/* 配对槽位 */}
@@ -59,7 +65,13 @@ export default function PickOpponent({ gameState }) {
                                             <div className="rounded-full p-[1px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.4)] flex-shrink-0">
                                                 <img src={getFullAvatarUrl(matchedChallenger.avatar)} alt="" className="w-8 h-8 rounded-full border border-teal-400/40 object-cover block" />
                                             </div>
-                                                <span className="text-sm font-bold text-teal-300">{matchedChallenger.name}</span>
+                                                <PlayerIdentity
+                                                    player={matchedChallenger}
+                                                    compact
+                                                    center={false}
+                                                    numberClassName="text-[9px] text-teal-500"
+                                                    nameClassName="text-sm text-teal-300"
+                                                />
                                             </div>
                                             <span className="text-[10px] text-red-400 font-bold border border-red-500/50 px-1 rounded">VS</span>
                                         </motion.div>
@@ -107,7 +119,13 @@ export default function PickOpponent({ gameState }) {
                                     <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5)]">
                                         <img src={getFullAvatarUrl(challenger.avatar)} alt="" className={`w-14 h-14 rounded-full border object-cover block ${isPicking ? 'border-teal-300/50' : 'border-slate-600/50'}`} />
                                     </div>
-                                    <span className={`text-xs font-bold text-center w-full truncate ${isPicking ? 'text-teal-200' : 'text-slate-400'}`}>{challenger.name}</span>
+                                    <PlayerIdentity
+                                        player={challenger}
+                                        compact
+                                        className="w-full"
+                                        numberClassName={`text-[9px] ${isPicking ? 'text-teal-400' : 'text-slate-500'}`}
+                                        nameClassName={`text-xs text-center w-full ${isPicking ? 'text-teal-200' : 'text-slate-400'}`}
+                                    />
                                 </motion.div>
                             )
                         })}

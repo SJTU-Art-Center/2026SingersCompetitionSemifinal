@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 export default function RankList({ gameState }) {
     const { players, currentGroup, round1Mode } = gameState;
@@ -67,9 +68,13 @@ export default function RankList({ gameState }) {
                                 <div className="rounded-full p-[2px] bg-gradient-to-b from-white/30 to-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.5)] flex-shrink-0">
                                     <img src={getFullAvatarUrl(player.avatar)} alt={player.name} className="w-14 h-14 rounded-full border border-white/20 shadow-inner object-cover block" />
                                 </div>
-                                <div className="relative z-10">
-                                    <h3 className="text-xl font-bold tracking-wide">{player.name}</h3>
-                                </div>
+                                <PlayerIdentity
+                                    player={player}
+                                    className="relative z-10"
+                                    center={false}
+                                    numberClassName="text-[10px] text-slate-400"
+                                    nameClassName="text-xl font-bold tracking-wide"
+                                />
                             </div>
                             <div className={`${isGroupMode ? 'text-6xl' : 'text-5xl'} font-black font-mono tracking-tighter pr-2 relative z-10`}>
                                 <ScoreCounter value={player.score} />

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { deriveFinalSettlement, getPlayerLatestScore } from '../../utils/finalSettlement';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 const TOTAL_SUBCOLS = 16;
 const BOARD_SAFE_LEFT = 6;
@@ -49,9 +50,9 @@ const getSlotWidth = (colSpan, dense = false) => {
 
 const HERO_STAGE1_SIZE = { width: getSlotWidth(5), height: '50%' };
 const HERO_STAGE2_SIZE = { width: getSlotWidth(5.5), height: '60%' };
-const STAGE5_CARD_SIZE = { width: getSlotWidth(2), height: '20%' };
-const STAGE6_CARD_SIZE = { width: getSlotWidth(3), height: 94 };
-const STAGE7_CARD_SIZE = { width: getSlotWidth(3), height: 102 };
+const STAGE5_CARD_SIZE = { width: getSlotWidth(2), height: '22%' };
+const STAGE6_CARD_SIZE = { width: getSlotWidth(3), height: 120 };
+const STAGE7_CARD_SIZE = { width: getSlotWidth(3), height: 118 };
 const COMPACT_SIZE = { width: getSlotWidth(2), height: COMPACT_HEIGHT };
 const COMPACT_DENSE_SIZE = { width: getSlotWidth(1, true), height: COMPACT_DENSE_HEIGHT };
 
@@ -413,7 +414,7 @@ const getStagePlacements = ({
                 statusLabel: '',
                 statusTone: 'success',
                     width: COMPACT_SIZE.width,
-                    height: '18%',
+                    height: '22%',
                     z: 6
                 }));
 
@@ -429,7 +430,7 @@ const getStagePlacements = ({
                     statusLabel: '',
                     statusTone: 'success',
                     width: COMPACT_SIZE.width,
-                    height: '18%',
+                    height: '22%',
                     z: 5,
                     topPct: 70
                 }));
@@ -452,7 +453,7 @@ const getStagePlacements = ({
                 statusTone: 'success',
                 z: 7,
                 width: COMPACT_SIZE.width,
-                height: '25%',
+                height: '26%',
                 topPct: 22,
                 minReservedMetaHeight: 44,
                 scale: 1.08
@@ -470,7 +471,7 @@ const getStagePlacements = ({
                     statusTone: 'pending',
                     z: 6,
                     width: COMPACT_SIZE.width,
-                    height: '18%',
+                    height: '22%',
                     topPct: 58,
                     minReservedMetaHeight: 44
                 });
@@ -487,7 +488,7 @@ const getStagePlacements = ({
                 statusTone: 'pending',
                 z: 4,
                 width: COMPACT_SIZE.width,
-                height: '18%',
+                height: '22%',
                 topPct: 89,
                 minReservedMetaHeight: 42
             });
@@ -506,7 +507,7 @@ const getStagePlacements = ({
             statusTone: 'pending',
             z: 6,
             width: COMPACT_SIZE.width,
-            height: '18%',
+            height: '22%',
             topPct: 58,
             minReservedMetaHeight: 44
         });
@@ -522,7 +523,7 @@ const getStagePlacements = ({
             statusTone: 'pending',
             z: 4,
             width: COMPACT_SIZE.width,
-            height: '18%',
+            height: '22%',
             topPct: 89,
             minReservedMetaHeight: 42
         });
@@ -562,13 +563,13 @@ const getStagePlacements = ({
             statusLabel: '晋级',
             statusTone: 'success',
             z: 8,
-            width: '10%',
-            height: '25%',
+            width: COMPACT_SIZE.width,
+            height: '26%',
             topPct: 25,
             safeLeft: 0,
             safeWidth: 100,
-            minReservedMetaHeight: 42,
-            scale: 1.03
+            minReservedMetaHeight: 44,
+            scale: 1.08
         });
 
         placeCenteredRow({
@@ -581,12 +582,13 @@ const getStagePlacements = ({
             statusLabel: '未晋级',
             statusTone: 'pending',
             z: 6,
-            width: '10%',
-            height: '25%',
+            width: COMPACT_SIZE.width,
+            height: '26%',
             topPct: 70,
             safeLeft: 0,
             safeWidth: 100,
-            minReservedMetaHeight: 42
+            minReservedMetaHeight: 44,
+            scale: 1.08
         });
 
         return placements;
@@ -595,7 +597,7 @@ const getStagePlacements = ({
     placeFixedFiveColGrid({
         target: placements,
         players: finalTop10,
-        topPercents: [32, 71],
+        topPercents: [33, 74],
         tone: 'success',
         showScore: true,
         showStatus: true,
@@ -603,7 +605,7 @@ const getStagePlacements = ({
         statusTone: 'success',
         z: 8,
         width: '14%',
-        height: '35%',
+        height: '36%',
         rowStart: 2,
         minReservedMetaHeight: 42,
         scale: 1.03
@@ -1116,6 +1118,9 @@ function PlayerCard({
     const isStage4PromotedCompact = mode === 'compact' && currentStage === 4 && tone === 'success';
     const isStage4MasterCompact = mode === 'compact' && currentStage === 4 && (tone === 'success' || tone === 'pending');
     const isStage6PromotedCompact = mode === 'compact' && currentStage === 6 && tone === 'success';
+    const isStage6NonPromotedCompact = mode === 'compact' && currentStage === 6 && tone === 'pending' && statusLabel === '未晋级';
+    const isStageTopPromotedCompact = isStage4PromotedCompact || isStage6PromotedCompact;
+    const isStageTopLikeCompact = isStageTopPromotedCompact || isStage6NonPromotedCompact;
     const isStage6Compact = mode === 'compact' && currentStage === 6;
     const isStage7Compact = mode === 'compact' && currentStage === 7;
     const isStage6LikeCompact = isStage6Compact || isStage4MasterCompact;
@@ -1150,7 +1155,12 @@ function PlayerCard({
                     <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${useLargeHeroIdentity ? 'w-44 h-44' : 'w-30 h-30'} rounded-full border border-white/20 object-cover`} />
                 </div>
 
-                <div className={`${useLargeHeroIdentity ? 'text-[clamp(1.45rem,2.45vw,2rem)]' : 'text-[1.2rem]'} ${noMeta ? (isStage1HeroNoMeta ? 'mt-4' : 'mt-3') : (isStage2Hero ? 'mt-4' : 'mt-2')} font-black text-slate-100 truncate w-full`}>{player.name}</div>
+                <PlayerIdentity
+                    player={player}
+                    className={`${noMeta ? (isStage1HeroNoMeta ? 'mt-4' : 'mt-3') : (isStage2Hero ? 'mt-4' : 'mt-2')} w-full`}
+                    numberClassName="text-[clamp(0.72rem,0.95vw,0.9rem)] text-slate-400"
+                    nameClassName={`${useLargeHeroIdentity ? 'text-[clamp(1.45rem,2.45vw,2rem)]' : 'text-[1.2rem]'} font-black text-slate-100`}
+                />
 
                 {!noMeta && (
                     <motion.div
@@ -1201,10 +1211,16 @@ function PlayerCard({
                 opacity: transitionState.phase === 'out' ? 0.88 : 1
             }}
             transition={MOTION.detail}
-            className={`h-full rounded-2xl border ${toneClass} ${isStage7Compact ? 'px-4 py-3' : (isStage6LikeCompact ? 'px-3 py-2.5' : 'px-2.5 py-2')} text-center flex flex-col items-center ${noMeta ? 'justify-center' : 'justify-between'}`}
+            className={`h-full rounded-2xl border ${toneClass} ${isStage7Compact ? 'px-4 py-3' : (isStage6LikeCompact ? 'px-3 py-2.5' : 'px-2.5 py-2')} text-center flex flex-col items-center ${noMeta ? 'justify-center' : ((isStageTopLikeCompact || isStage7Compact) ? 'justify-start' : 'justify-between')}`}
         >
             <img src={getFullAvatarUrl(player.avatar)} alt={player.name} onError={handleAvatarError} className={`${isStage7Compact ? 'w-[6rem] h-[6rem]' : (noMeta ? 'w-[4.5rem] h-[4.5rem]' : (isStage6LikeCompact ? 'w-[3.75rem] h-[3.75rem]' : 'w-12 h-12'))} rounded-full border border-white/20 object-cover flex-shrink-0`} />
-            <div className={`${isStage7Compact ? 'mt-3 text-[20px]' : (noMeta ? 'mt-2.5 text-sm' : (isStage6LikeCompact ? 'mt-1.5 text-[11px]' : 'mt-1 text-[10px]'))} leading-tight font-black text-slate-100 truncate w-full min-h-[1.1rem]`}>{player.name}</div>
+            <PlayerIdentity
+                player={player}
+                compact
+                className={`${isStage7Compact ? 'mt-2' : (noMeta ? 'mt-2.5' : (isStageTopLikeCompact ? 'mt-1' : (isStage6LikeCompact ? 'mt-1.5' : 'mt-1')))} w-full min-h-[1.1rem]`}
+                numberClassName={`${isStage7Compact ? 'text-[12px]' : (isStage6LikeCompact || noMeta ? 'text-[10px]' : 'text-[9px]')} text-slate-400`}
+                nameClassName={`${isStage7Compact ? 'text-[20px]' : ((noMeta || isStageTopLikeCompact) ? 'text-[15px]' : (isStage6LikeCompact ? 'text-[12px]' : 'text-[11px]'))} font-black text-slate-100`}
+            />
 
             {!noMeta && (
                 <motion.div
@@ -1219,7 +1235,7 @@ function PlayerCard({
                             ? { duration: 0.44, ease: [0.22, 1, 0.36, 1], delay: showScore ? 0.08 : 0 }
                             : { ...MOTION.detail, duration: 0.3 }
                     }
-                    className={`${isStage7Compact ? 'mt-2 text-[18px]' : (isStage6LikeCompact ? 'mt-1 text-[13px]' : 'mt-0.5 text-xs')} font-mono font-black text-teal-200 ${minReservedMetaHeight ? '' : 'min-h-[16px]'}`}
+                    className={`${isStage7Compact ? 'mt-1 text-[18px]' : (isStageTopLikeCompact ? 'mt-0 text-[15px]' : (isStage6LikeCompact ? 'mt-1 text-[13px]' : 'mt-0.5 text-xs'))} font-mono font-black text-teal-200 ${minReservedMetaHeight ? '' : 'min-h-[16px]'}`}
                     style={minReservedMetaHeight ? { minHeight: `${Math.max(14, minReservedMetaHeight - 20)}px` } : undefined}
                 >
                     {showScore ? Number(scoreValue || 0).toFixed(2) : ''}
@@ -1239,7 +1255,7 @@ function PlayerCard({
                             ? { duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: showStatus ? 0.18 : 0 }
                             : { ...MOTION.detail, duration: 0.28, delay: showStatus ? 0.05 : 0 }
                     }
-                    className={`${isStage7Compact ? 'mt-2 text-[13px] px-3 py-1' : (isStage6LikeCompact ? 'mt-1 text-[11px] px-2 py-0.5' : 'mt-0.5 text-[10px] px-1.5 py-0.5')} font-black tracking-[0.04em] rounded border ${statusClass}`}
+                    className={`${isStage7Compact ? 'mt-1 text-[13px] px-3 py-1' : (isStageTopLikeCompact ? 'mt-0.5 text-[11px] px-2 py-0.5' : (isStage6LikeCompact ? 'mt-1 text-[11px] px-2 py-0.5' : 'mt-0.5 text-[10px] px-1.5 py-0.5'))} font-black tracking-[0.04em] rounded border ${statusClass}`}
                 >
                     {showStatus ? statusLabel : ''}
                 </motion.div>
@@ -1268,6 +1284,7 @@ PlayerCard.propTypes = {
     player: PropTypes.shape({
         id: PropTypes.number.isRequired,
         name: PropTypes.string.isRequired,
+        number: PropTypes.string,
         avatar: PropTypes.string
     }).isRequired,
     mode: PropTypes.oneOf(['hero', 'compact']).isRequired,

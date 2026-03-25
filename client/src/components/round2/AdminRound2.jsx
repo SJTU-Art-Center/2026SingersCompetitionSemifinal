@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
+import { getPlayerSingleLine } from '../../utils/playerIdentity';
 
 export default function AdminRound2({ gameState, updateState, adminMatchIndex, setAdminMatchIndex }) {
     const pkMatches = gameState.pkMatches || [];
@@ -159,9 +161,9 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                         <img src={getFullAvatarUrl(master?.avatar)} alt="" className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
                                     </div>
                                     <div className="text-[10px] font-bold w-full text-center leading-tight">
-                                        <span className="text-teal-300">{c?.name ?? '?'}</span>
+                                        <span className="text-teal-300">{getPlayerSingleLine(c, '?')}</span>
                                         <span className="text-slate-500 mx-0.5">vs</span>
-                                        <span className="text-emerald-300">{master?.name ?? '?'}</span>
+                                        <span className="text-emerald-300">{getPlayerSingleLine(master, '?')}</span>
                                     </div>
                                 <div className={`text-[10px] font-mono ${isFin ? 'text-emerald-300' : isAct ? 'text-yellow-400' : 'text-slate-500'}`}>
                                     {isFin ? `${m.challengerScore?.toFixed(1)}:${m.masterScore?.toFixed(1)}` : isAct ? '打分中' : `#${idx + 1}`}
@@ -192,7 +194,14 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                 {/* 挑战者 */}
                                 <div className="flex-1 flex flex-col items-center bg-teal-900/20 border border-teal-800/50 rounded-lg py-2 px-1">
                                     <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-teal-500 object-cover shadow mb-1" />
-                                    <div className="text-xs font-black text-teal-300 text-center">{cInfo?.name ?? '?'}</div>
+                                    <PlayerIdentity
+                                        player={cInfo}
+                                        fallbackName="?"
+                                        compact
+                                        className="mt-0.5"
+                                        numberClassName="text-[9px] text-teal-500"
+                                        nameClassName="text-xs font-black text-teal-300"
+                                    />
                                     <div className="text-[10px] text-teal-500">挑战者</div>
                                     {isFinished && <div className="text-sm font-black text-teal-200 mt-1">{activeMatch.challengerScore?.toFixed(1)}</div>}
                                 </div>
@@ -200,7 +209,14 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                 {/* 擂主 */}
                                 <div className="flex-1 flex flex-col items-center bg-emerald-900/20 border border-emerald-800/50 rounded-lg py-2 px-1">
                                     <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-10 h-10 rounded-full border-2 border-emerald-500 object-cover shadow mb-1" />
-                                    <div className="text-xs font-black text-emerald-300 text-center">{mInfo?.name ?? '?'}</div>
+                                    <PlayerIdentity
+                                        player={mInfo}
+                                        fallbackName="?"
+                                        compact
+                                        className="mt-0.5"
+                                        numberClassName="text-[9px] text-emerald-500"
+                                        nameClassName="text-xs font-black text-emerald-300"
+                                    />
                                     <div className="text-[10px] text-emerald-500">擂主</div>
                                     {isFinished && <div className="text-sm font-black text-emerald-200 mt-1">{activeMatch.masterScore?.toFixed(1)}</div>}
                                 </div>
@@ -210,7 +226,7 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                             {isFinished ? (
                                 <div className="flex flex-col gap-2">
                                     <div className="text-center py-2 text-xs text-slate-400 border border-slate-700 rounded-lg">
-                                        {activeMatch.winner === 'master' ? `${mInfo?.name} 擂主胜（晋级十强）` : '擂主未胜（含同分）→ 两人进入待定池'}
+                                        {activeMatch.winner === 'master' ? `${getPlayerSingleLine(mInfo)} 擂主胜（晋级十强）` : '擂主未胜（含同分）→ 两人进入待定池'}
                                     </div>
                                     <div className="text-[10px] text-slate-400 text-center">可按现场情况修改分数并重新结算</div>
                                     <div className="flex gap-1.5">

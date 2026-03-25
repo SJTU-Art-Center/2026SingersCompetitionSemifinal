@@ -1,6 +1,7 @@
 import React from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { deriveFinalSettlement } from '../../utils/finalSettlement';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 const FINAL_STAGES = [
     { value: 1, label: 'Stage 1 · 大魔王亮相', hint: '仅展示2个大魔王，不显示晋级状态' },
@@ -176,7 +177,14 @@ export default function AdminRound4({ gameState, updateState }) {
                                         <div className="flex items-center gap-2 min-w-0">
                                             <span className="text-teal-300 font-black w-4 text-center">{idx + 1}</span>
                                             <img src={getFullAvatarUrl(player.avatar)} alt="" className="w-6 h-6 rounded-full border border-white/20 object-cover" />
-                                            <span className="truncate text-slate-100 font-bold">{player.name}</span>
+                                            <PlayerIdentity
+                                                player={player}
+                                                compact
+                                                center={false}
+                                                className="min-w-0"
+                                                numberClassName="text-[9px] text-teal-500"
+                                                nameClassName="text-slate-100"
+                                            />
                                         </div>
                                         <span className="font-mono text-teal-200">{player.latestScore.toFixed(2)}</span>
                                     </div>
@@ -193,7 +201,14 @@ export default function AdminRound4({ gameState, updateState }) {
                                         <div className="flex items-center gap-2 min-w-0">
                                             <span className="text-slate-400 font-black w-4 text-center">{idx + 1}</span>
                                             <img src={getFullAvatarUrl(player.avatar)} alt="" className="w-6 h-6 rounded-full border border-white/20 object-cover" />
-                                            <span className="truncate text-slate-100 font-bold">{player.name}</span>
+                                            <PlayerIdentity
+                                                player={player}
+                                                compact
+                                                center={false}
+                                                className="min-w-0"
+                                                numberClassName="text-[9px] text-slate-500"
+                                                nameClassName="text-slate-100"
+                                            />
                                         </div>
                                         <span className="font-mono text-slate-300">{player.latestScore.toFixed(2)}</span>
                                     </div>
@@ -230,7 +245,14 @@ export default function AdminRound4({ gameState, updateState }) {
                                         <td className="py-2 px-2">
                                             <div className="flex items-center gap-2 min-w-0">
                                                 <img src={getFullAvatarUrl(row.avatar)} alt="" className="w-7 h-7 rounded-full border border-white/20 object-cover" />
-                                                <span className="font-bold text-slate-100 truncate">{row.name}</span>
+                                                <PlayerIdentity
+                                                    player={row}
+                                                    compact
+                                                    center={false}
+                                                    className="min-w-0"
+                                                    numberClassName="text-[9px] text-slate-500"
+                                                    nameClassName="font-bold text-slate-100"
+                                                />
                                             </div>
                                         </td>
                                         <td className="py-2 px-2 text-slate-300">{row.role}</td>

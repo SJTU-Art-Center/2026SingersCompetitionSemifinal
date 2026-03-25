@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import Cropper from 'react-easy-crop';
 import { getFullAvatarUrl } from '../utils/avatar';
+import PlayerIdentity from './common/PlayerIdentity';
 
 // Helper function to extract cropped image as base64
 const getCroppedImg = async (imageSrc, pixelCrop) => {
@@ -34,6 +35,7 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
 export default function PlayerManager({ gameState, updateState }) {
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
+    const [editNumber, setEditNumber] = useState('');
     const [editGroup, setEditGroup] = useState(1);
     const [editAvatar, setEditAvatar] = useState("");
 
@@ -48,6 +50,7 @@ export default function PlayerManager({ gameState, updateState }) {
     const handleEdit = (p) => {
         setEditingId(p.id);
         setEditName(p.name);
+        setEditNumber((p.number ?? String(p.id ?? '')).toString().replace(/\D/g, '').slice(-3).padStart(3, '0'));
         setEditGroup(p.group || 1);
         setEditAvatar(p.avatar);
         setImageSrc(null); // Reset cropper state when editing new player
@@ -100,9 +103,16 @@ export default function PlayerManager({ gameState, updateState }) {
     };
 
     const handleSave = () => {
+        const numberDigits = String(editNumber || '').replace(/\D/g, '').slice(0, 3);
+        if (!numberDigits) {
+            alert('请输入3位选手号码');
+            return;
+        }
+        const normalizedNumber = numberDigits.padStart(3, '0');
+
         const newPlayers = gameState.players.map(p => {
             if (p.id === editingId) {
-                return { ...p, name: editName, group: parseInt(editGroup), avatar: editAvatar };
+                return { ...p, name: editName, number: normalizedNumber, group: parseInt(editGroup), avatar: editAvatar };
             }
             return p;
         });
@@ -166,7 +176,13 @@ export default function PlayerManager({ gameState, updateState }) {
                             <div key={p.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-3 flex flex-col items-center relative shadow-inner hover:bg-white/10 transition-colors">
                                 <img src={getFullAvatarUrl(p.avatar)} alt="avatar" className="w-[84px] h-[84px] rounded-full mb-3 object-cover border-2 border-white/20 shadow-lg" />
                                 <div className="absolute top-1 right-1 bg-slate-800 border border-slate-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold text-teal-400 opacity-80 z-10">{p.group || 1}</div>
-                                <div className="text-sm font-bold text-slate-300 truncate w-full text-center pb-2 border-b border-white/10 mb-2">{p.name}</div>
+                                <PlayerIdentity
+                                    player={p}
+                                    className="w-full pb-2 border-b border-white/10 mb-2"
+                                    compact
+                                    numberClassName="text-[9px] text-slate-500"
+                                    nameClassName="text-sm text-slate-300"
+                                />
                                 <button
                                     onClick={() => handleEdit(p)}
                                     className="mt-1 text-sm font-bold bg-slate-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg w-full transition-colors flex justify-center items-center"
@@ -191,6 +207,16 @@ export default function PlayerManager({ gameState, updateState }) {
                                 value={editName}
                                 onChange={e => setEditName(e.target.value)}
                                 className="bg-slate-950 border-2 border-slate-600 rounded-lg p-3 text-2xl font-black text-center text-teal-300 mb-6 outline-none focus:border-teal-500 shadow-inner"
+                            />
+
+                            <label className="text-sm text-slate-400 mb-2 font-bold flex bg-slate-800 px-3 py-1 rounded w-fit">选手号码（3位）</label>
+                            <input
+                                type="text"
+                                value={editNumber}
+                                onChange={e => setEditNumber(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                                maxLength={3}
+                                className="bg-slate-950 border-2 border-slate-600 rounded-lg p-3 text-2xl font-black text-center tracking-[0.35em] text-amber-300 mb-6 outline-none focus:border-amber-500 shadow-inner"
+                                placeholder="001"
                             />
 
                             <label className="text-sm text-slate-400 mb-2 font-bold flex bg-slate-800 px-3 py-1 rounded w-fit">所属组别 (第一轮)</label>
@@ -239,7 +265,7 @@ export default function PlayerManager({ gameState, updateState }) {
                             <span className="text-5xl mb-6 py-4 animate-bounce">👈</span>
                             <p className="font-bold">请点击左侧列表的</p>
                             <p className="text-sm mt-1 bg-teal-900/30 px-3 py-1 rounded">"编辑按钮"</p>
-                            <p className="text-sm mt-3 opacity-60">来修改图片和姓名</p>
+                            <p className="text-sm mt-3 opacity-60">来修改号码、图片和姓名</p>
                         </div>
                     )}
                 </div>
