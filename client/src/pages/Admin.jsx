@@ -13,6 +13,16 @@ export default function Admin() {
     const [adminGroup, setAdminGroup] = useState(gameState?.currentGroup || 1);
     const [adminRound1Mode, setAdminRound1Mode] = useState(gameState?.round1Mode || 'group');
 
+    const finalStageLabels = {
+        1: '大魔王亮相',
+        2: '大魔王分数与晋级',
+        3: '8擂主+8攻擂者',
+        4: '8组晋级重排',
+        5: '待定大魔王聚焦',
+        6: '待定区补位展示',
+        7: '最终阵容'
+    };
+
     if (!gameState) {
         return (
             <div className="p-8 text-white flex flex-col justify-center items-center min-h-screen text-2xl font-bold bg-slate-900 gap-4">
@@ -50,6 +60,10 @@ export default function Admin() {
             const c = m ? gameState.players.find(p => p.id === m.challengerId)?.name : null;
             const ms = m ? gameState.players.find(p => p.id === m.masterId)?.name : null;
             return `第二轮【第${idx + 1}场${c && ms ? ` ${c}vs${ms}` : ''}】`;
+        }
+        if (sr === 4) {
+            const stage = Number(gameState.screenFinalStageIndex ?? gameState.finalStageIndex ?? 1);
+            return `终极补位【Stage ${stage} · ${finalStageLabels[stage] || '最终阵容'}】`;
         }
         return phases[screenIdx]?.label;
     })();

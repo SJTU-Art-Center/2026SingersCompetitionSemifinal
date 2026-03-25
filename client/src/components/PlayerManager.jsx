@@ -135,7 +135,9 @@ export default function PlayerManager({ gameState, updateState }) {
                 activeDemonKingId: null,
                 demonKingAvgScore: 0,
                 dkScoreSubmitted: false,
-                resurrectionCalculated: false
+                resurrectionCalculated: false,
+                finalStageIndex: 1,
+                screenFinalStageIndex: 1
             };
             updateState(defaultData);
         }

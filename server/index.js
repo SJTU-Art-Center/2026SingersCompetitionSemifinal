@@ -70,6 +70,8 @@ function initData() {
       pkMatches: [], // {p1, p2, winner}
       demonKingScore: 0,
       screenMatchIndex: 0, // 第二轮: 大屏正在展示的PK对战索引
+      finalStageIndex: 1,
+      screenFinalStageIndex: 1,
     };
     fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
     return defaultData;

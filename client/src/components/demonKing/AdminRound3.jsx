@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 
 export default function AdminRound3({ gameState, updateState }) {
-    const pkMatches = gameState.pkMatches || [];
-    let totalPkScore = 0;
-    let pkPlayerCount = 0;
-    pkMatches.forEach(m => {
-        if (m.status === 'finished') {
-            totalPkScore += m.challengerScore + m.masterScore;
-            pkPlayerCount += 2;
-        }
-    });
-    const averageScore = pkPlayerCount > 0 ? (totalPkScore / pkPlayerCount).toFixed(3) : 0;
-
     const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score || a.id - b.id);
     const demonKings = sortedPlayers.slice(0, 2);
+    const referencePlayers = sortedPlayers.slice(2, 18);
+    const referenceAverage = referencePlayers.length > 0
+        ? referencePlayers.reduce((sum, player) => sum + Number(player.score || 0), 0) / referencePlayers.length
+        : 0;
+    const averageScore = referenceAverage.toFixed(3);
 
     const [selectedDKId, setSelectedDKId] = useState(gameState.activeDemonKingId ?? null);
     const [scoreInput, setScoreInput] = useState('');
