@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
+import { getPlayerSingleLine } from '../../utils/playerIdentity';
 
 export default function AdminPickOpponent({ gameState, updateState }) {
     const sortedPlayers = [...gameState.players].sort((a, b) => {
@@ -103,7 +105,16 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                             className={`w-full text-left p-2 rounded-2xl flex items-center gap-3 transition-all shadow-inner backdrop-blur-sm border ${gameState.pickingChallengerId === c.id ? 'bg-emerald-600/70 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)] border-emerald-400' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}
                                         >
                                             <img src={getFullAvatarUrl(c.avatar)} alt="" className="w-9 h-9 rounded-full border border-white/20 object-cover flex-shrink-0" />
-                                            <span className="font-bold">{c.name} (第{sortedPlayers.findIndex(x => x.id === c.id) + 1}名)</span>
+                                            <div className="min-w-0 flex-1">
+                                                <PlayerIdentity
+                                                    player={c}
+                                                    compact
+                                                    center={false}
+                                                    numberClassName="text-[9px] text-slate-400"
+                                                    nameClassName="font-bold text-sm"
+                                                />
+                                                <div className="text-[10px] text-slate-400">第{sortedPlayers.findIndex(x => x.id === c.id) + 1}名</div>
+                                            </div>
                                             {gameState.pickingChallengerId === c.id && <span className="ml-auto text-xs font-bold bg-white text-emerald-600 px-2 rounded-full">正在挑选</span>}
                                         </button>
                                     )
@@ -121,7 +132,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                 >
                                     <option value="">-- 选择目标擂主 --</option>
                                     {masters.filter(m => !pkMatches.find(x => x.masterId === m.id)).map(m => (
-                                        <option key={m.id} value={m.id}>{m.name} (第{sortedPlayers.findIndex(x => x.id === m.id) + 1}名)</option>
+                                        <option key={m.id} value={m.id}>{getPlayerSingleLine(m)} (第{sortedPlayers.findIndex(x => x.id === m.id) + 1}名)</option>
                                     ))}
                                 </select>
                             </div>
@@ -147,12 +158,26 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                 <div className="flex items-center space-x-3 flex-1">
                                     <div className="flex items-center gap-2 bg-teal-600/20 border border-teal-500/30 rounded-full px-2 py-1 w-1/3">
                                         <img src={getFullAvatarUrl(cInfo?.avatar)} alt="" className="w-8 h-8 rounded-full border border-teal-500/50 object-cover flex-shrink-0" />
-                                        <span className="text-sm font-bold text-teal-300 truncate">{cInfo?.name}</span>
+                                        <PlayerIdentity
+                                            player={cInfo}
+                                            compact
+                                            center={false}
+                                            className="min-w-0"
+                                            numberClassName="text-[9px] text-teal-500"
+                                            nameClassName="text-sm text-teal-300"
+                                        />
                                     </div>
                                     <div className="text-base font-black text-slate-500 italic flex-1 text-center">VS</div>
                                     <div className="flex items-center gap-2 bg-emerald-600/20 border border-emerald-500/30 rounded-full px-2 py-1 w-1/3 justify-end flex-row-reverse">
                                         <img src={getFullAvatarUrl(mInfo?.avatar)} alt="" className="w-8 h-8 rounded-full border border-emerald-500/50 object-cover flex-shrink-0" />
-                                        <span className="text-sm font-bold text-emerald-300 truncate">{mInfo?.name}</span>
+                                        <PlayerIdentity
+                                            player={mInfo}
+                                            compact
+                                            center={false}
+                                            className="min-w-0"
+                                            numberClassName="text-[9px] text-emerald-500"
+                                            nameClassName="text-sm text-emerald-300"
+                                        />
                                     </div>
                                 </div>
                                 <div className="ml-3">

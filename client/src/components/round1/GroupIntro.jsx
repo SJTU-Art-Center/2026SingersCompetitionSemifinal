@@ -1,5 +1,6 @@
 import React from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 const GROUP_COLORS = [
     { ring: 'from-teal-400/60 to-teal-800/20', label: 'bg-teal-600/80 text-teal-100', title: 'text-teal-300', border: 'border-teal-500/30' },
@@ -52,9 +53,13 @@ export default function GroupIntro({ gameState }) {
                                         />
                                     </div>
                                     {/* Name */}
-                                    <span className={`text-xs font-bold ${color.title} truncate max-w-full text-center leading-tight`}>
-                                        {p.name}
-                                    </span>
+                                    <PlayerIdentity
+                                        player={p}
+                                        compact
+                                        className="max-w-full"
+                                        numberClassName="text-[9px] text-slate-400"
+                                        nameClassName={`text-xs ${color.title}`}
+                                    />
                                 </div>
                             ))}
                         </div>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
+import { getPlayerSingleLine } from '../../utils/playerIdentity';
 
 export default function AdminRound3({ gameState, updateState }) {
     const players = Array.isArray(gameState.players) ? gameState.players : [];
@@ -110,7 +112,13 @@ export default function AdminRound3({ gameState, updateState }) {
                             >
                                 <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className="w-12 h-12 rounded-full border border-white/20 object-cover shadow flex-shrink-0" />
                                 <div className="flex flex-col items-start">
-                                    <div className="font-black text-sm">{dk.name}</div>
+                                    <PlayerIdentity
+                                        player={dk}
+                                        compact
+                                        center={false}
+                                        numberClassName="text-[9px] text-slate-500"
+                                        nameClassName="font-black text-sm"
+                                    />
                                     <div className="text-xs text-slate-400">第一轮: {dk.score}</div>
                                     {hasValidScore(dk) && (
                                         <div className={`text-xs font-bold mt-0.5 ${dk.scoreDK > averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -130,14 +138,19 @@ export default function AdminRound3({ gameState, updateState }) {
                         选中后请使用顶部「📺 投屏」按钮上屏
                     </div>
                     <div className="mb-2 text-[11px] text-slate-400 text-center">
-                        当前上屏：<span className="text-cyan-300 font-bold">{projectedDK ? projectedDK.name : '未投屏'}</span>
+                        当前上屏：<span className="text-cyan-300 font-bold">{projectedDK ? getPlayerSingleLine(projectedDK) : '未投屏'}</span>
                     </div>
                     {selectedDK ? (
                         <div>
                             <div className="flex gap-3 items-center mb-3">
                                 <div className="flex flex-col items-center flex-shrink-0 w-16">
                                     <img src={getFullAvatarUrl(selectedDK.avatar)} alt="avatar" className="w-12 h-12 rounded-full border-2 border-teal-500 object-cover shadow" />
-                                    <div className="text-sm font-black mt-1 text-white text-center">{selectedDK.name}</div>
+                                    <PlayerIdentity
+                                        player={selectedDK}
+                                        className="mt-1"
+                                        numberClassName="text-[10px] text-slate-400"
+                                        nameClassName="text-sm text-white"
+                                    />
                                     {hasValidScore(selectedDK) ? (
                                         <div className={`text-[10px] font-bold text-center ${selectedDK.scoreDK > averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
                                             {selectedDK.scoreDK}

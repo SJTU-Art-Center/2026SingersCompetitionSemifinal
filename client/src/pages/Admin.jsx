@@ -6,6 +6,7 @@ import AdminRound3 from '../components/demonKing/AdminRound3';
 import AdminRound4 from '../components/final/AdminRound4';
 import AdminPickOpponent from '../components/transition/AdminPickOpponent';
 import PlayerManager from '../components/PlayerManager';
+import { getPlayerSingleLine } from '../utils/playerIdentity';
 
 export default function Admin() {
     const { gameState, updateState, connectionError, activeServerUrl } = useGameState();
@@ -57,8 +58,10 @@ export default function Admin() {
         if (sr === 2) {
             const idx = gameState.screenMatchIndex ?? 0;
             const m = (gameState.pkMatches || [])[idx];
-            const c = m ? gameState.players.find(p => p.id === m.challengerId)?.name : null;
-            const ms = m ? gameState.players.find(p => p.id === m.masterId)?.name : null;
+            const cPlayer = m ? gameState.players.find(p => p.id === m.challengerId) : null;
+            const mPlayer = m ? gameState.players.find(p => p.id === m.masterId) : null;
+            const c = cPlayer ? getPlayerSingleLine(cPlayer) : null;
+            const ms = mPlayer ? getPlayerSingleLine(mPlayer) : null;
             return `第二轮【第${idx + 1}场${c && ms ? ` ${c}vs${ms}` : ''}】`;
         }
         if (sr === 4) {

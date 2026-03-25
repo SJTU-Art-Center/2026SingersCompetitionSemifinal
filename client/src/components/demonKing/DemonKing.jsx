@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 export default function DemonKing({ gameState }) {
     const activeDemonKingId = gameState?.activeDemonKingId ?? null;
@@ -45,7 +46,12 @@ export default function DemonKing({ gameState }) {
                     <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.65),0_0_24px_rgba(20,184,166,0.18)] mt-[clamp(6px,1.1vh,12px)] mb-[clamp(8px,1.4vh,14px)]">
                         <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-[clamp(96px,11vw,128px)] h-[clamp(96px,11vw,128px)] rounded-full border-[3px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
                     </div>
-                    <h3 className="text-[clamp(1.15rem,2.1vw,1.7rem)] font-black tracking-wide text-center">{dk.name}</h3>
+                    <PlayerIdentity
+                        player={dk}
+                        className="mt-1"
+                        numberClassName="text-[clamp(0.72rem,1vw,0.9rem)] text-slate-400"
+                        nameClassName="text-[clamp(1.15rem,2.1vw,1.7rem)] font-black tracking-wide"
+                    />
 
                     <div className="w-full mt-[clamp(8px,1.4vh,14px)] px-[clamp(4px,0.8vw,10px)] flex flex-col items-center">
                         <div className="w-full flex flex-col items-end">

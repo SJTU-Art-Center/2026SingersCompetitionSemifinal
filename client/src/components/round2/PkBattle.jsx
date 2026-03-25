@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 export default function PkBattle({ gameState }) {
     const pkMatches = gameState.pkMatches || [];
@@ -108,7 +109,13 @@ export default function PkBattle({ gameState }) {
                     <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(20,184,166,0.25)] mt-[clamp(8px,1.6vh,18px)]">
                         <img src={getFullAvatarUrl(cInfo?.avatar)} alt={cInfo?.name} className="w-36 h-36 rounded-full border-[3px] border-teal-400/50 object-cover block" />
                     </div>
-                    <h3 className="text-[clamp(1.15rem,2vw,1.7rem)] font-black mt-[clamp(8px,1.4vh,14px)] tracking-wide text-center leading-tight min-h-[56px] flex items-center justify-center">{cInfo?.name || "未知选手"}</h3>
+                    <PlayerIdentity
+                        player={cInfo}
+                        fallbackName="未知选手"
+                        className="mt-[clamp(8px,1.4vh,14px)] min-h-[56px] justify-center"
+                        numberClassName="text-[clamp(0.7rem,0.9vw,0.82rem)] text-slate-400"
+                        nameClassName="text-[clamp(1.15rem,2vw,1.7rem)] font-black tracking-wide"
+                    />
 
                     <div className="mt-[clamp(6px,1vh,12px)] text-center min-h-[72px] flex items-center justify-center w-full">
                         {isFinished ? (
@@ -159,7 +166,13 @@ export default function PkBattle({ gameState }) {
                     <div className="rounded-full p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.25)] mt-[clamp(8px,1.6vh,18px)]">
                         <img src={getFullAvatarUrl(mInfo?.avatar)} alt={mInfo?.name} className="w-36 h-36 rounded-full border-[3px] border-emerald-400/50 object-cover block" />
                     </div>
-                    <h3 className="text-[clamp(1.15rem,2vw,1.7rem)] font-black mt-[clamp(8px,1.4vh,14px)] tracking-wide text-center leading-tight min-h-[56px] flex items-center justify-center">{mInfo?.name || "未知擂主"}</h3>
+                    <PlayerIdentity
+                        player={mInfo}
+                        fallbackName="未知擂主"
+                        className="mt-[clamp(8px,1.4vh,14px)] min-h-[56px] justify-center"
+                        numberClassName="text-[clamp(0.7rem,0.9vw,0.82rem)] text-slate-400"
+                        nameClassName="text-[clamp(1.15rem,2vw,1.7rem)] font-black tracking-wide"
+                    />
 
                     <div className="mt-[clamp(6px,1vh,12px)] text-center min-h-[72px] flex items-center justify-center w-full">
                         {isFinished ? (

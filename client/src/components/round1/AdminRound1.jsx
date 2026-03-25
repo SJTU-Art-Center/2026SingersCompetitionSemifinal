@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import PlayerIdentity from '../common/PlayerIdentity';
 
 export default function AdminRound1({ gameState, updateState, adminGroup }) {
     const [selectedPlayerId, setSelectedPlayerId] = useState(null);
@@ -101,7 +102,13 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
                                 className={`py-1.5 px-1.5 rounded-xl transition-all border flex flex-col items-center gap-1 ${selectedPlayerId === p.id ? 'bg-teal-700/60 text-white shadow-[0_0_12px_rgba(20,184,166,0.4)] border-teal-400 scale-105 backdrop-blur-sm' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 backdrop-blur-sm shadow-inner'}`}
                             >
                                 <img src={getFullAvatarUrl(p.avatar)} alt={p.name} className="w-8 h-8 rounded-full border border-white/20 object-cover shadow" />
-                                <div className="font-bold truncate text-xs w-full text-center">{p.name}</div>
+                                <PlayerIdentity
+                                    player={p}
+                                    compact
+                                    className="w-full"
+                                    numberClassName="text-[9px] text-slate-400"
+                                    nameClassName="text-xs"
+                                />
                                 <div className={`text-[10px] font-mono flex flex-col items-center ${p.score > 0 ? 'text-emerald-300' : 'text-slate-500'}`}>
                                     {p.score > 0 ? (
                                         <>
@@ -124,7 +131,12 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
                             <div className="flex gap-3 items-center mb-3">
                                 <div className="flex flex-col items-center flex-shrink-0">
                                     <img src={getFullAvatarUrl(selectedPlayer.avatar)} alt="avatar" className="w-12 h-12 rounded-full border-2 border-teal-500 object-cover shadow" />
-                                    <div className="text-sm font-black mt-1 text-white text-center">{selectedPlayer.name}</div>
+                                    <PlayerIdentity
+                                        player={selectedPlayer}
+                                        className="mt-1"
+                                        numberClassName="text-[10px] text-slate-400"
+                                        nameClassName="text-sm text-white"
+                                    />
                                     {selectedPlayer.score > 0 ? (
                                         <div className="text-[10px] text-emerald-400 text-center font-bold">{selectedPlayer.score.toFixed(2)}</div>
                                     ) : (

@@ -60,6 +60,7 @@ function initData() {
       pickingChallengerId: null, // 正在挑选对手的挑战者ID
       players: Array.from({ length: 30 }).map((_, i) => ({
         id: i + 1,
+        number: String(i + 1).padStart(3, '0'),
         name: `选手 ${i + 1}`,
         avatar: `https://i.pravatar.cc/150?u=${i + 1}`, // 随机头像
         group: Math.floor(i / 5) + 1, // 1~6组，每组5人
