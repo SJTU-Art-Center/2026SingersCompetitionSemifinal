@@ -27,11 +27,25 @@ export default function AdminRound3({ gameState, updateState }) {
 
     const handleProjectSelected = () => {
         if (!selectedDKId) return alert('请先选择一位大魔王');
+        const selected = gameState.players.find(p => p.id === selectedDKId);
+        if (!selected) return;
+
+        const projectedSnapshot = {
+            id: selected.id,
+            name: selected.name,
+            avatar: selected.avatar,
+            scoreDK: selected.scoreDK || 0,
+            status: selected.status,
+            submitted: (selected.scoreDK || 0) > 0
+        };
+
         updateState({
             ...gameState,
             screenRound: 3,
             activeDemonKingId: selectedDKId,
-            demonKingAvgScore: parseFloat(averageScore)
+            demonKingAvgScore: parseFloat(averageScore),
+            projectedDemonKing: projectedSnapshot,
+            projectedDemonKingAvgScore: parseFloat(averageScore)
         });
     };
 
@@ -48,7 +62,21 @@ export default function AdminRound3({ gameState, updateState }) {
     };
 
     const handleResetScore = () => {
-        updateState({ ...gameState, dkScoreSubmitted: false });
+        const selected = gameState.players.find(p => p.id === selectedDKId);
+        const projected = gameState.projectedDemonKing;
+        const shouldResetProjected = projected && selected && projected.id === selected.id;
+
+        updateState({
+            ...gameState,
+            dkScoreSubmitted: false,
+            ...(shouldResetProjected ? {
+                projectedDemonKing: {
+                    ...projected,
+                    scoreDK: 0,
+                    submitted: false
+                }
+            } : {})
+        });
         setScoreInput('');
     };
 
@@ -62,11 +90,17 @@ export default function AdminRound3({ gameState, updateState }) {
             const newStatus = dkScore > avg ? 'advanced' : 'pending';
             return { ...p, scoreDK: dkScore, status: newStatus };
         });
-        updateState({ ...gameState, players: newPlayers, dkScoreSubmitted: true });
+        updateState({
+            ...gameState,
+            players: newPlayers,
+            dkScoreSubmitted: true,
+            projectedDemonKing: null,
+            projectedDemonKingAvgScore: null
+        });
     };
 
     const selectedDK = gameState.players.find(p => p.id === selectedDKId);
-    const projectedDK = gameState.players.find(p => p.id === gameState.activeDemonKingId);
+    const projectedDKName = gameState.projectedDemonKing?.name || gameState.players.find(p => p.id === gameState.activeDemonKingId)?.name;
 
     return (
         <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl">
@@ -125,7 +159,7 @@ export default function AdminRound3({ gameState, updateState }) {
                                     className="w-full bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
                                 >📺 投屏当前大魔王</button>
                                 <div className="text-[10px] text-slate-400 text-center mt-1">
-                                    当前大屏：{projectedDK?.name || '未投屏'}
+                                    当前大屏：{projectedDKName || '未投屏'}
                                 </div>
                             </div>
 
