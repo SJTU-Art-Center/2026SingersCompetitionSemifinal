@@ -1,0 +1,33 @@
+/* Theme: Light (clean fresh) */
+.theme-light {
+  --color-bg-base: #f1f5f9;
+  --color-bg-screen: #ffffff;
+  --color-text-main: #0f172a;
+  --color-text-muted: #475569;
+  --color-card-bg: rgba(255, 255, 255, 0.85);
+  --color-card-border: rgba(203, 213, 225, 0.8);
+  --color-glow-1: rgba(56, 189, 248, 0.2);
+  --color-glow-2: rgba(52, 211, 153, 0.2);
+  --title-gradient-from: #0284c7;
+  --title-gradient-to: #059669;
+
+  --rank-king-bg: linear-gradient(to right, #ffe4e6, #fecdd3);
+  --rank-king-border: #f43f5e;
+  --rank-king-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+  --rank-king-text: #881337;
+
+  --rank-master-bg: linear-gradient(to right, #fef3c7, #fde68a);
+  --rank-master-border: #f59e0b;
+  --rank-master-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  --rank-master-text: #78350f;
+
+  --rank-challenger-bg: linear-gradient(to right, #e0f2fe, #bae6fd);
+  --rank-challenger-border: #0ea5e9;
+  --rank-challenger-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+  --rank-challenger-text: #0c4a6e;
+
+  --rank-eliminated-bg: #f8fafc;
+  --rank-eliminated-border: #e2e8f0;
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #94a3b8;
+}

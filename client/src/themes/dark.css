@@ -1,0 +1,33 @@
+/* Theme: Dark (default — emerald/teal sci-fi) */
+:root {
+  --color-bg-base: #022c22; /* emerald-950 */
+  --color-bg-screen: #064e3b; /* emerald-900 */
+  --color-text-main: #f8fafc;
+  --color-text-muted: #a7f3d0; /* emerald-200 */
+  --color-card-bg: rgba(6, 78, 59, 0.7);
+  --color-card-border: rgba(16, 185, 129, 0.3); /* emerald-500 */
+  --color-glow-1: rgba(16, 185, 129, 0.15);
+  --color-glow-2: rgba(20, 184, 166, 0.15); /* teal-500 */
+  --title-gradient-from: #6ee7b7; /* emerald-300 */
+  --title-gradient-to: #059669; /* emerald-600 */
+  /* Score Ranks */
+  --rank-king-bg: #065f46; /* emerald-800 */
+  --rank-king-border: #10b981; /* emerald-500 */
+  --rank-king-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --rank-king-text: #ffffff;
+
+  --rank-master-bg: #115e59; /* teal-800 */
+  --rank-master-border: #14b8a6; /* teal-500 */
+  --rank-master-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --rank-master-text: #ffffff;
+
+  --rank-challenger-bg: #1e3a8a; /* Keeping challenger slightly distinct blue-900 or use cyan */
+  --rank-challenger-border: #06b6d4; /* cyan-500 */
+  --rank-challenger-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --rank-challenger-text: #ffffff;
+
+  --rank-eliminated-bg: #020617; /* slate-950 */
+  --rank-eliminated-border: #1e293b; /* slate-800 */
+  --rank-eliminated-shadow: none;
+  --rank-eliminated-text: #64748b; /* slate-500 */
+}
