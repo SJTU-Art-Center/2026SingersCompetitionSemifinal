@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
 
-const STAGE_TOP_ROW = '20%';
-const STAGE_BOTTOM_ROW = '82%';
-const SLOT_ROW_TOP = '46%';
+const STAGE_TOP_ROW = '14%';
+const STAGE_BOTTOM_ROW = '68%';
+const SLOT_ROW_TOP = '38%';
 
 export default function PickOpponent({ gameState }) {
     const { players, pickingChallengerId, pkMatches = [] } = gameState;
     const stage = Number(gameState.screenTransitionStage ?? gameState.transitionStage ?? 1);
 
-    const [stage3Phase, setStage3Phase] = useState('arrive');
     const [stage2ShiftTop18, setStage2ShiftTop18] = useState(false);
 
     const sortedPlayers = [...players].sort((a, b) => {
@@ -31,15 +30,6 @@ export default function PickOpponent({ gameState }) {
     }, [top18]);
 
     useEffect(() => {
-        if (stage !== 3) {
-            setStage3Phase('arrive');
-            return;
-        }
-
-        setStage3Phase('arrive');
-    }, [stage]);
-
-    useEffect(() => {
         if (stage !== 2) {
             setStage2ShiftTop18(false);
             return;
@@ -53,32 +43,30 @@ export default function PickOpponent({ gameState }) {
         return () => window.clearTimeout(t);
     }, [stage]);
 
-    const isChallengerMatched = (challengerId) => pkMatches.some((m) => m.challengerId === challengerId);
-
-    const renderFace = (player, compact = true, gold = false) => (
-        <div className={`h-full flex flex-col items-center justify-between text-center ${compact ? 'py-1 gap-1' : 'py-2 gap-2'}`}>
+    const renderFace = (player, compact = true) => (
+        <div className={`h-full flex flex-col items-center justify-between text-center ${compact ? 'py-0.5 gap-0.5' : 'py-1.5 gap-1.5'}`}>
             <img
                 src={getFullAvatarUrl(player.avatar)}
                 alt=""
-                className={`${compact ? 'w-11 h-11 rounded-xl' : 'w-28 h-28 rounded-2xl'} border border-white/30 object-cover block`}
+                className={`${compact ? 'w-10 h-10 rounded-xl' : 'w-24 h-24 rounded-2xl'} border border-white/30 object-cover block`}
             />
             <PlayerIdentity
                 player={player}
                 compact={compact}
                 className="w-full"
-                numberClassName={compact ? 'hidden' : 'text-xs text-teal-200'}
-                nameClassName={compact ? 'text-[12px] font-black text-white truncate text-center' : 'text-[34px] font-black text-white'}
+                numberClassName={compact ? 'text-[9px] text-teal-200 tracking-[0.16em]' : 'text-xs text-teal-200'}
+                nameClassName={compact ? 'text-[10px] font-black text-white truncate text-center' : 'text-[30px] font-black text-white'}
             />
             {compact
-                ? <div className="text-[14px] font-black text-teal-100 leading-none">{Number(player.score || 0).toFixed(2)}</div>
-                : <div className="text-[40px] font-black text-teal-100 leading-none">{Number(player.score || 0).toFixed(2)}</div>
+                ? <div className="text-[13px] font-black text-teal-100 leading-none">{Number(player.score || 0).toFixed(2)}</div>
+                : <div className="text-[34px] font-black text-teal-100 leading-none">{Number(player.score || 0).toFixed(2)}</div>
             }
         </div>
     );
 
     const renderRankCard = (player, mode, flipIndex = 0) => {
         const shouldEliminate = mode === 'stage2-eliminate' && bottom12Ids.has(player.id);
-        const cardShell = 'w-[80%] mx-auto aspect-[3/4] rounded-[14px] border p-2 backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.25)]';
+        const cardShell = 'w-[74%] mx-auto aspect-[3/4] rounded-[14px] border p-1.5 backdrop-blur-md shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.25)]';
 
         if (mode === 'stage1-flip') {
             return (
@@ -139,8 +127,8 @@ export default function PickOpponent({ gameState }) {
         let cursor = 0;
 
         return (
-            <div className="w-full max-w-[96%] mx-auto flex flex-col items-center justify-center -translate-y-5">
-                <div className="w-full max-w-[1240px] grid grid-rows-4 gap-1.5">
+            <div className="w-full max-w-[98%] mx-auto flex flex-col items-center justify-center -translate-y-1">
+                <div className="w-full max-w-[1500px] grid grid-rows-4 gap-1">
                     {rowCounts.map((count) => {
                         const rowStart = cursor;
                         const rowPlayers = sortedPlayers.slice(rowStart, rowStart + count);
@@ -176,9 +164,9 @@ export default function PickOpponent({ gameState }) {
 
         return (
             <div className="w-full h-full flex items-center justify-center">
-                <div className="w-full max-w-[96%] mx-auto flex flex-col items-center justify-center -translate-y-5">
-                    <div className="w-full max-w-[1240px] grid grid-rows-4 gap-1.5">
-                        {rowCounts.map((count, rowIndex) => {
+                <div className="w-full max-w-[98%] mx-auto flex flex-col items-center justify-center -translate-y-1">
+                    <div className="w-full max-w-[1500px] grid grid-rows-4 gap-1">
+                        {rowCounts.map((count) => {
                             const rowStart = cursor;
                             const rowPlayers = sortedPlayers.slice(rowStart, rowStart + count);
                             cursor += count;
@@ -198,7 +186,7 @@ export default function PickOpponent({ gameState }) {
                                             <motion.div
                                                 key={player.id}
                                                 initial={{ y: 0, opacity: 1, scale: 1 }}
-                                                animate={{ y: isTop18 && stage2ShiftTop18 ? 106 : 0, opacity: 1, scale: 1 }}
+                                                animate={{ y: isTop18 && stage2ShiftTop18 ? 72 : 0, opacity: 1, scale: 1 }}
                                                 transition={{ duration: isTop18 ? 0.82 : 0.2, ease: [0.22, 1, 0.36, 1] }}
                                             >
                                                 {renderRankCard(player, 'stage2-static', idx)}
@@ -221,14 +209,14 @@ export default function PickOpponent({ gameState }) {
                     {top2[0] && (
                         <motion.div
                             key={`demon-${top2[0].id}`}
-                            className="absolute w-[250px]"
-                            initial={{ top: '4%', left: '5.5%', x: '-50%', y: 0, scale: 0.44, opacity: 1 }}
+                            className="absolute w-[220px]"
+                            initial={{ top: '6%', left: '12%', x: '-50%', y: 0, scale: 0.42, opacity: 1 }}
                             animate={{
-                                top: '50%',
+                                top: '46%',
                                 left: '50%',
-                                x: '-325px',
+                                x: '-270px',
                                 y: '-50%',
-                                scale: 1.16,
+                                scale: 1.04,
                                 opacity: 1
                             }}
                             transition={{
@@ -246,14 +234,14 @@ export default function PickOpponent({ gameState }) {
                     {top2[1] && (
                         <motion.div
                             key={`demon-${top2[1].id}`}
-                            className="absolute w-[250px]"
-                            initial={{ top: '4%', left: '16.5%', x: '-50%', y: 0, scale: 0.44, opacity: 1 }}
+                            className="absolute w-[220px]"
+                            initial={{ top: '6%', left: '23%', x: '-50%', y: 0, scale: 0.42, opacity: 1 }}
                             animate={{
-                                top: '50%',
+                                top: '46%',
                                 left: '50%',
-                                x: '75px',
+                                x: '50px',
                                 y: '-50%',
-                                scale: 1.16,
+                                scale: 1.04,
                                 opacity: 1
                             }}
                             transition={{
@@ -289,14 +277,14 @@ export default function PickOpponent({ gameState }) {
 
         return (
             <LayoutGroup id="stage5-pairing-layout">
-                <div className="w-full h-full max-w-[96%] mx-auto py-2 relative">
-                    <div className="absolute left-[-1.5%] right-[-1.5%] rounded-2xl border border-cyan-200/25 bg-cyan-900/10 backdrop-blur-sm h-[22%]" style={{ top: '84%' }} />
+                <div className="w-full h-full max-w-[98%] mx-auto py-1 relative">
+                    <div className="absolute left-[-1%] right-[-1%] rounded-2xl border border-cyan-200/25 bg-cyan-900/10 backdrop-blur-sm h-[18%]" style={{ top: '72%' }} />
 
-                    <div className="absolute left-1/2 -translate-x-1/2 text-2xl font-black text-amber-100/90 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]" style={{ top: '41.5%' }}>
+                    <div className="absolute left-1/2 -translate-x-1/2 text-[1.6rem] font-black text-amber-100/90 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]" style={{ top: '33.5%' }}>
                         ⚔️
                     </div>
 
-                    <div className="absolute left-[4%] right-[4%] grid grid-cols-8 gap-2 opacity-100" style={{ top: SLOT_ROW_TOP }}>
+                    <div className="absolute left-[3%] right-[3%] grid grid-cols-8 gap-2 opacity-100" style={{ top: SLOT_ROW_TOP }}>
                         {Array.from({ length: 8 }).map((_, idx) => {
                             const match = slotMatchByMasterIndex.get(idx);
                             const challenger = match ? players.find((p) => p.id === match.challengerId) : null;
@@ -320,7 +308,7 @@ export default function PickOpponent({ gameState }) {
                         })}
                     </div>
 
-                    <div className="absolute left-[4%] right-[4%] grid grid-cols-8 gap-2" style={{ top: STAGE_TOP_ROW }}>
+                    <div className="absolute left-[3%] right-[3%] grid grid-cols-8 gap-2" style={{ top: STAGE_TOP_ROW }}>
                         {stageRows.masters.map((master, idx) => {
                             const matchedInfo = matchByMasterId.get(master.id);
 
@@ -339,7 +327,7 @@ export default function PickOpponent({ gameState }) {
                         })}
                     </div>
 
-                    <div className="absolute left-[4%] right-[4%] grid grid-cols-8 gap-2" style={{ top: STAGE_BOTTOM_ROW }}>
+                    <div className="absolute left-[3%] right-[3%] grid grid-cols-8 gap-2" style={{ top: STAGE_BOTTOM_ROW }}>
                         {stageRows.attackers.map((challenger) => {
                             const isMatched = matchByChallengerId.has(challenger.id);
                             const isPicking = pickingChallengerId === challenger.id;
