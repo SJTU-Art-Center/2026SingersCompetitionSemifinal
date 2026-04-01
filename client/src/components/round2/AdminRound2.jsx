@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
 import { getPlayerSingleLine } from '../../utils/playerIdentity';
@@ -14,7 +14,8 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         updateState({
             ...gameState,
             screenRound: 2,
-            screenMatchIndex: index
+            screenMatchIndex: index,
+            screenDisplayMode: 'live'
         });
     };
 

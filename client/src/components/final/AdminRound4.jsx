@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { deriveFinalSettlement } from '../../utils/finalSettlement';
 import PlayerIdentity from '../common/PlayerIdentity';
@@ -14,7 +14,7 @@ const FINAL_STAGES = [
 ];
 
 export default function AdminRound4({ gameState, updateState }) {
-    const finalData = React.useMemo(() => deriveFinalSettlement(gameState), [gameState]);
+    const finalData = useMemo(() => deriveFinalSettlement(gameState), [gameState]);
 
     const {
         demonKingThreshold,
@@ -35,7 +35,7 @@ export default function AdminRound4({ gameState, updateState }) {
 
     const projectedLabel = FINAL_STAGES.find((item) => item.value === screenFinalStageIndex)?.label || 'Stage 1';
 
-    const stagePendingTotal = React.useMemo(() => {
+    const stagePendingTotal = useMemo(() => {
         const merged = [...pendingDemonKings, ...pendingMasters, ...challengersByPair];
         const seen = new Set();
         merged.forEach((player) => {
@@ -55,7 +55,8 @@ export default function AdminRound4({ gameState, updateState }) {
             screenRound: 4,
             screenFinalStageIndex: stage,
             finalStageIndex: stage,
-            resurrectionCalculated: true
+            resurrectionCalculated: true,
+            screenDisplayMode: 'live'
         });
     };
 

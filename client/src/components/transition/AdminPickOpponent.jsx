@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
 import { getPlayerSingleLine } from '../../utils/playerIdentity';
@@ -38,7 +38,8 @@ export default function AdminPickOpponent({ gameState, updateState }) {
             pickingChallengerId: null,
             screenRound: 1.5,
             screenTransitionStage: 4,
-            transitionStage: Math.max(4, Number(gameState.transitionStage ?? 1))
+            transitionStage: Math.max(4, Number(gameState.transitionStage ?? 1)),
+            screenDisplayMode: 'live'
         });
         setSelChallenger("");
         setSelMaster("");
@@ -70,7 +71,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
     const editStage = Number(gameState.transitionStage ?? 1);
     const screenStage = Number(gameState.screenTransitionStage ?? editStage);
     const handleProjectStage = (stage) => {
-        updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage });
+        updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage, screenDisplayMode: 'live' });
     };
 
     return (

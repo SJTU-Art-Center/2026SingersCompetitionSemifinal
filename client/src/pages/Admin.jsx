@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import AdminRound1 from '../components/round1/AdminRound1';
 import AdminRound2 from '../components/round2/AdminRound2';
@@ -34,7 +34,8 @@ export default function Admin() {
         );
     }
 
-    const currentTheme = gameState.theme || 'theme-dark';
+    const currentTheme = gameState.theme || 'theme-background';
+    const screenDisplayMode = gameState.screenDisplayMode || 'live';
 
     const phases = [
         { value: 0,   label: '赛前设置',  icon: '⚙️' },
@@ -47,6 +48,40 @@ export default function Admin() {
     const phaseIndex = (v) => phases.findIndex(p => p.value === v);
     const adminIdx = phaseIndex(gameState.adminRound);
     const screenIdx = phaseIndex(gameState.screenRound);
+    const displayModeLabelMap = {
+        live: '直播投屏',
+        background: '背景模式',
+        kv: 'KV 模式',
+        black: '黑屏模式'
+    };
+
+    const projectLiveScreen = () => {
+        if (gameState.adminRound === 1) {
+            updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode, screenDisplayMode: 'live' });
+        } else if (gameState.adminRound === 1.5) {
+            const stage = Number(gameState.transitionStage ?? 1);
+            updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage, screenDisplayMode: 'live' });
+        } else if (gameState.adminRound === 2) {
+            updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex, screenDisplayMode: 'live' });
+        } else if (gameState.adminRound === 3) {
+            const selectedId = gameState.selectedDemonKingId ?? gameState.activeDemonKingId ?? null;
+            updateState({
+                ...gameState,
+                screenRound: gameState.adminRound,
+                activeDemonKingId: selectedId,
+                screenDisplayMode: 'live'
+            });
+        } else if (gameState.adminRound === 4) {
+            const stage = Number(gameState.finalStageIndex ?? 1);
+            updateState({ ...gameState, screenRound: gameState.adminRound, screenFinalStageIndex: stage, finalStageIndex: stage, resurrectionCalculated: true, screenDisplayMode: 'live' });
+        } else {
+            updateState({ ...gameState, screenRound: gameState.adminRound, screenDisplayMode: 'live' });
+        }
+    };
+
+    const setScreenDisplayMode = (mode) => {
+        updateState({ ...gameState, screenDisplayMode: mode });
+    };
 
     const screenPinLabel = (() => {
         const sr = gameState.screenRound;
@@ -90,34 +125,32 @@ export default function Admin() {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-base font-bold text-slate-300 border-l-4 border-teal-500 pl-3">比赛阶段控制</h2>
-                        <button
-                            onClick={() => {
-                                if (gameState.adminRound === 1) {
-                                    // R1: also commit the currently editing group/mode to screen
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode });
-                                } else if (gameState.adminRound === 1.5) {
-                                    const stage = Number(gameState.transitionStage ?? 1);
-                                    updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage });
-                                } else if (gameState.adminRound === 2) {
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, screenMatchIndex: adminMatchIndex });
-                                } else if (gameState.adminRound === 3) {
-                                    const selectedId = gameState.selectedDemonKingId ?? gameState.activeDemonKingId ?? null;
-                                    updateState({
-                                        ...gameState,
-                                        screenRound: gameState.adminRound,
-                                        activeDemonKingId: selectedId
-                                    });
-                                } else if (gameState.adminRound === 4) {
-                                    const stage = Number(gameState.finalStageIndex ?? 1);
-                                    updateState({ ...gameState, screenRound: gameState.adminRound, screenFinalStageIndex: stage, finalStageIndex: stage, resurrectionCalculated: true });
-                                } else {
-                                    updateState({ ...gameState, screenRound: gameState.adminRound });
-                                }
-                            }}
-                            className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
-                        >
-                            📺 投屏
-                        </button>
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                            <button
+                                onClick={projectLiveScreen}
+                                className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
+                            >
+                                📺 投屏
+                            </button>
+                            <button
+                                onClick={() => setScreenDisplayMode('background')}
+                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'background' ? 'bg-sky-500/85 text-white border-sky-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                            >
+                                背景
+                            </button>
+                            <button
+                                onClick={() => setScreenDisplayMode('kv')}
+                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'kv' ? 'bg-fuchsia-500/85 text-white border-fuchsia-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                            >
+                                KV
+                            </button>
+                            <button
+                                onClick={() => setScreenDisplayMode('black')}
+                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'black' ? 'bg-slate-950 text-white border-slate-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                            >
+                                黑屏
+                            </button>
+                        </div>
                     </div>
 
                     {/* Phase buttons */}
@@ -171,7 +204,12 @@ export default function Admin() {
                     {/* Status label row */}
                     <div className="mt-1 flex justify-between px-1 mb-4">
                         <span className="text-xs text-teal-400 font-bold">✏️ 编辑: {phases[adminIdx]?.label}</span>
-                        <span className="text-xs text-amber-400 font-bold">📺 大屏: {screenPinLabel}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-amber-400 font-bold">📺 大屏: {screenPinLabel}</span>
+                            <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${screenDisplayMode === 'live' ? 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10' : screenDisplayMode === 'background' ? 'text-sky-200 border-sky-400/40 bg-sky-500/10' : screenDisplayMode === 'kv' ? 'text-fuchsia-200 border-fuchsia-400/40 bg-fuchsia-500/10' : 'text-slate-100 border-slate-400/40 bg-slate-700/40'}`}>
+                                {displayModeLabelMap[screenDisplayMode]}
+                            </span>
+                        </div>
                     </div>
 
                     {/* ── Per-phase sub-panel ── */}
@@ -203,6 +241,17 @@ export default function Admin() {
                 {/* RIGHT: Compact theme selector */}
                 <div className="flex-shrink-0 w-44 flex flex-col gap-2 border-l border-slate-700 pl-5">
                     <div className="text-xs font-bold text-slate-400 mb-1 border-l-4 border-pink-500 pl-2">大屏主题</div>
+                    <button
+                        onClick={() => updateState({ ...gameState, theme: 'theme-background' })}
+                        className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${
+                            currentTheme === 'theme-background'
+                                ? 'bg-fuchsia-600 shadow-[0_0_10px_rgba(217,70,239,0.4)] text-white'
+                                : 'bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                        }`}
+                    >
+                        🖼️ <span className="truncate">Background 默认</span>
+                        {currentTheme === 'theme-background' && <span className="ml-auto text-[10px] bg-white text-fuchsia-600 px-1.5 rounded-full">当前</span>}
+                    </button>
                     <button
                         onClick={() => updateState({ ...gameState, theme: 'theme-dark' })}
                         className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${
