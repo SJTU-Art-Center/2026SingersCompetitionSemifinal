@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
@@ -11,80 +12,102 @@ export default function DemonKing({ gameState }) {
 
     const dk = players.find(p => p.id === activeDemonKingId);
 
-    if (!dk) {
-        return <div className="text-center mt-32 text-6xl text-slate-700 font-bold loading-dots">等待大魔王登场...</div>;
-    }
-
-    const rawFinalScore = Number(dk.scoreDK);
+    const rawFinalScore = Number(dk?.scoreDK);
     const hasDkScore = Number.isFinite(rawFinalScore) && rawFinalScore > 0;
     const finalScore = hasDkScore ? rawFinalScore : 0;
     const isSuccess = hasDkScore && finalScore > targetScore;
-    const isFailed = hasDkScore && finalScore < targetScore;
+    const isFailed = hasDkScore && finalScore <= targetScore;
+    const [isScoreSettled, setIsScoreSettled] = useState(false);
+    const [showOutcome, setShowOutcome] = useState(false);
+
+    const revealedIsSuccess = showOutcome && isSuccess;
+    const revealedIsFailed = showOutcome && isFailed;
+
+    const handleScoreComplete = useCallback(() => {
+        setIsScoreSettled(true);
+        window.setTimeout(() => {
+            setShowOutcome(true);
+        }, 500);
+    }, []);
+
+    useEffect(() => {
+        setIsScoreSettled(!hasDkScore);
+        setShowOutcome(false);
+    }, [hasDkScore, finalScore]);
+
+    if (!dk) {
+        return <div className="text-center mt-32 text-6xl text-slate-700 font-bold loading-dots">等待大魔王登场...</div>;
+    }
 
     return (
         <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(4px,0.8vh,10px)] pb-[clamp(6px,1vh,12px)] overflow-hidden">
             <motion.h2
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-[clamp(1.7rem,3vw,2.3rem)] font-black mt-[clamp(4px,0.8vh,12px)] mb-[clamp(4px,0.8vh,10px)] text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-emerald-700 tracking-[0.22em] italic"
+                className="text-[clamp(1.65rem,3vw,2.25rem)] font-black mt-[clamp(4px,0.8vh,12px)] mb-[clamp(4px,0.8vh,10px)] text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.96),rgba(220,240,255,0.72))] tracking-[0.24em] italic drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]"
             >
                 大魔王降临
             </motion.h2>
 
             <div className="w-full flex-1 min-h-0 relative z-10 flex items-center justify-center overflow-hidden">
-                <div className="w-full max-w-[clamp(720px,78vw,1100px)]">
+                <div className="w-full max-w-[clamp(820px,82vw,1220px)]">
                     <motion.div
                         animate={{
-                            scale: isSuccess ? 1.03 : (isFailed ? 0.9 : 1),
-                            y: isSuccess ? -8 : 0,
-                            opacity: isFailed ? 0.9 : 1,
-                            filter: isFailed ? 'grayscale(60%)' : 'grayscale(0%)'
+                            scale: revealedIsSuccess ? 1.03 : (revealedIsFailed ? 0.9 : 1),
+                            y: revealedIsSuccess ? -8 : 0,
+                            opacity: revealedIsFailed ? 0.9 : 1,
+                            filter: revealedIsFailed ? 'grayscale(60%)' : 'grayscale(0%)'
                         }}
                         transition={{ type: 'spring' }}
-                        className={`bg-transparent border-2 rounded-3xl px-[clamp(14px,1.7vw,22px)] pt-[clamp(10px,1vh,14px)] pb-[clamp(10px,1vh,14px)] flex items-center gap-[clamp(16px,2vw,28px)] w-full overflow-hidden ${isSuccess ? 'border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.35)]' : (isFailed ? 'border-slate-500 shadow-[0_0_14px_rgba(34,211,238,0.25)]' : 'border-teal-500 shadow-lg')}`}
+                        className={`min-h-[clamp(330px,44vh,470px)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.018))] border rounded-[34px] px-[clamp(28px,3vw,42px)] py-[clamp(24px,3vh,34px)] flex items-stretch gap-[clamp(26px,3vw,48px)] w-full overflow-hidden backdrop-blur-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_rgba(2,6,23,0.26)] ${revealedIsSuccess ? 'border-white/20' : (revealedIsFailed ? 'border-white/10 opacity-92' : 'border-white/14')}`}
                     >
-                        <div className="shrink-0 flex flex-col items-center justify-center min-w-[clamp(180px,20vw,250px)]">
-                            <div className="rounded-[1.85rem] p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.65),0_0_24px_rgba(20,184,166,0.18)]">
-                                <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className={`w-[clamp(92px,9vw,120px)] h-[clamp(92px,9vw,120px)] rounded-[1.55rem] border-[3px] object-cover block ${isSuccess ? 'border-emerald-400/60' : 'border-teal-500/40'}`} />
+                        <div className="shrink-0 w-[clamp(220px,24vw,310px)] flex flex-col items-center justify-center gap-[clamp(18px,2.3vh,26px)] py-[clamp(8px,1vh,14px)]">
+                            <div className="rounded-[2.1rem] p-[4px] bg-[linear-gradient(180deg,rgba(255,255,255,0.32),rgba(255,255,255,0.08))] shadow-[0_12px_24px_rgba(2,6,23,0.18)]">
+                                <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className="w-[clamp(126px,12.8vw,170px)] h-[clamp(126px,12.8vw,170px)] rounded-[1.8rem] border-[3px] border-white/18 object-cover block" />
                             </div>
                             <PlayerIdentity
                                 player={dk}
-                                className="mt-3"
-                                numberClassName="text-[clamp(0.72rem,1vw,0.9rem)] text-slate-400"
-                                nameClassName="text-[clamp(1.05rem,1.6vw,1.45rem)] font-black tracking-wide"
+                                className="text-center"
+                                numberPrefix="No."
+                                numberClassName="text-[clamp(0.9rem,1.15vw,1.05rem)] text-white/56 tracking-[0.18em]"
+                                nameClassName="text-[clamp(1.5rem,2vw,2rem)] font-black tracking-[0.08em] text-white"
                             />
                         </div>
 
-                        <div className="w-full px-[clamp(4px,0.8vw,10px)] flex flex-col items-center min-w-0">
-                            <div className="w-full flex flex-col items-end">
-                                <div className="text-teal-400 font-bold text-[clamp(0.72rem,0.95vw,0.86rem)] mb-1 flex items-center">
-                                    <span className="mr-2">🏆 及格线 (16人均分)</span>
-                                    <span className="font-mono text-[clamp(0.9rem,1.25vw,1.08rem)]">{targetScore.toFixed(3)}</span>
+                        <div className="w-full min-w-0 flex-1 flex flex-col justify-between gap-[clamp(22px,2.8vh,34px)] py-[clamp(6px,0.8vh,12px)]">
+                            <div className="w-full flex flex-col items-end gap-[clamp(10px,1.2vh,14px)]">
+                                <div className="flex items-center gap-3 text-white/72 font-bold text-[clamp(0.84rem,1vw,0.96rem)] tracking-[0.14em]">
+                                    <span>🏆 及格线 (16人均分)</span>
+                                    <span className="font-mono text-[clamp(1.08rem,1.45vw,1.34rem)] text-white/88">{targetScore.toFixed(2)}</span>
                                 </div>
-                                <div className="w-full h-[2px] bg-teal-500/80 relative">
-                                    <div className="absolute top-[-4px] right-0 w-2.5 h-2.5 bg-teal-400 rounded-full shadow-md"></div>
+                                <div className="w-full h-[2px] bg-white/34 relative overflow-hidden rounded-full">
+                                    <div className="absolute top-1/2 right-0 -translate-y-1/2 w-3 h-3 bg-white/82 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.45)]"></div>
                                 </div>
                             </div>
 
-                            <div className="mt-[clamp(10px,1.2vh,14px)] w-full flex justify-center pb-[clamp(8px,1vh,12px)] border-b border-slate-700/80">
-                                <div className="text-[clamp(1.8rem,3.1vw,2.9rem)] leading-none font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+                            <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))] px-[clamp(20px,2vw,28px)] py-[clamp(22px,3vh,32px)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                                <div className="text-white/55 font-bold text-[clamp(0.84rem,1vw,0.96rem)] tracking-[0.2em] mb-[clamp(8px,1vh,12px)]">大魔王第二轮得分</div>
+                                <div className="text-[clamp(2.6rem,4.6vw,4.35rem)] leading-none font-mono font-black text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.96),rgba(255,255,255,0.58))] text-center">
                                     {hasDkScore ? (
-                                        <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} />
+                                        <AnimatedScore value={finalScore} target={targetScore} isSuccess={isSuccess} onComplete={handleScoreComplete} />
                                     ) : (
-                                        <span className="text-slate-600 opacity-50">0.000</span>
+                                        <span className="text-white/28">???</span>
                                     )}
+                                </div>
+                                <div className="mt-[clamp(14px,1.8vh,20px)] text-[clamp(0.86rem,1vw,0.96rem)] tracking-[0.16em] text-white/42 text-center">
+                                    分数公布后将自动判定是否直接晋级十强
                                 </div>
                             </div>
 
                             <AnimatePresence>
-                                {hasDkScore && (
+                                {hasDkScore && isScoreSettled && showOutcome && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        transition={{ delay: 1.5, type: 'spring' }}
-                                        className={`w-full mt-[clamp(8px,1vh,12px)] py-[clamp(8px,1vh,10px)] text-center text-[clamp(0.9rem,1.4vw,1.2rem)] font-black tracking-[0.08em] text-white rounded-xl shadow-lg border-2 ${isSuccess ? 'bg-emerald-600 border-emerald-400' : 'bg-slate-700 border-slate-500 text-teal-200'}`}
+                                        transition={{ type: 'spring' }}
+                                        className={`w-full min-h-[clamp(62px,8vh,84px)] px-[clamp(18px,2vw,28px)] py-[clamp(14px,1.8vh,18px)] flex items-center justify-center text-center text-[clamp(1.04rem,1.5vw,1.32rem)] font-black tracking-[0.12em] rounded-[24px] shadow-lg border backdrop-blur-[8px] ${revealedIsSuccess ? 'bg-white/10 border-white/18 text-white shadow-[0_0_28px_rgba(255,255,255,0.14)]' : 'bg-white/6 border-white/12 text-white/82 shadow-[0_0_18px_rgba(255,255,255,0.08)]'}`}
                                     >
-                                        {isSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
+                                        {revealedIsSuccess ? '👑 守擂成功 · 直接晋级 👑' : '🛡️ 守擂失败 · 落入待定区 🛡️'}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -96,8 +119,7 @@ export default function DemonKing({ gameState }) {
     );
 }
 
-// 带颜色渐变和音效节奏的分数跳动组件
-function AnimatedScore({ value, target, isSuccess }) {
+function AnimatedScore({ value, target, isSuccess, onComplete }) {
     const [displayValue, setDisplayValue] = useState(0);
     const [colorClass, setColorClass] = useState("from-white to-slate-400");
 
@@ -105,7 +127,7 @@ function AnimatedScore({ value, target, isSuccess }) {
         setDisplayValue(0);
         setColorClass("from-white to-slate-400");
 
-        let start = 0;
+        const start = 0;
         const end = value;
         const duration = 1000;
         const startTime = performance.now();
@@ -135,11 +157,33 @@ function AnimatedScore({ value, target, isSuccess }) {
                 if (!isSuccess) {
                     setColorClass("from-slate-400 to-slate-600");
                 }
+                onComplete();
             }
         };
 
         requestAnimationFrame(tick);
-    }, [value, target, isSuccess]);
+    }, [value, target, isSuccess, onComplete]);
 
-    return <span className={`text-transparent bg-clip-text bg-gradient-to-b ${colorClass}`}>{displayValue.toFixed(3)}</span>;
+    return <span className={`text-transparent bg-clip-text bg-gradient-to-b ${colorClass}`}>{displayValue.toFixed(2)}</span>;
 }
+
+DemonKing.propTypes = {
+    gameState: PropTypes.shape({
+        activeDemonKingId: PropTypes.number,
+        demonKingAvgScore: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        players: PropTypes.arrayOf(PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            name: PropTypes.string,
+            avatar: PropTypes.string,
+            number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            scoreDK: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        })),
+    }).isRequired,
+};
+
+AnimatedScore.propTypes = {
+    value: PropTypes.number.isRequired,
+    target: PropTypes.number.isRequired,
+    isSuccess: PropTypes.bool.isRequired,
+    onComplete: PropTypes.func.isRequired,
+};

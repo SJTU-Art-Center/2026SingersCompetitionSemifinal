@@ -107,46 +107,49 @@ export default function Admin() {
     })();
 
     return (
-        <div className="min-h-screen text-white bg-slate-900 font-sans p-8">
+        <div className="min-h-screen text-white bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.08),transparent_24%),linear-gradient(180deg,#0f172a,#020617_65%)] font-sans p-8">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">
-                    控制中心 | 校园歌手大赛
-                </h1>
+            <div className="flex justify-between items-center mb-6 border-b border-slate-700/80 pb-4">
+                <div>
+                    <div className="text-[11px] uppercase tracking-[0.36em] text-slate-400 font-black mb-2">Broadcast Control Deck</div>
+                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-200 to-emerald-300">
+                        控制中心 | 校园歌手大赛
+                    </h1>
+                </div>
                 <div className="flex space-x-4 items-center">
-                    <span className="text-sm text-slate-400">实时连接正常 🟢</span>
+                    <span className="text-sm text-slate-300 bg-slate-800/70 border border-slate-700 px-3 py-1.5 rounded-full backdrop-blur-md">实时连接正常 🟢</span>
                 </div>
             </div>
 
             {/* ═══ UNIFIED PHASE CONTROL + THEME ═══ */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl mb-6 flex gap-5">
+            <div className="bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(10,15,28,0.8))] border border-slate-700/80 rounded-[28px] p-6 shadow-[0_26px_60px_rgba(2,6,23,0.3)] mb-6 flex gap-6 backdrop-blur-xl">
 
                 {/* LEFT: Phase track + sub-panel */}
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-base font-bold text-slate-300 border-l-4 border-teal-500 pl-3">比赛阶段控制</h2>
-                        <div className="flex flex-wrap items-center justify-end gap-2">
+                    <div className="flex items-center justify-between mb-4 gap-4">
+                        <h2 className="text-base font-bold text-slate-200 border-l-4 border-teal-400 pl-3 tracking-[0.16em] uppercase">比赛阶段控制</h2>
+                        <div className="flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-700 bg-slate-900/55 px-2.5 py-2 backdrop-blur-md">
                             <button
                                 onClick={projectLiveScreen}
-                                className="bg-amber-600/80 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-lg shadow-lg text-sm border border-amber-500 transition-colors"
+                                className="bg-amber-600/85 hover:bg-amber-500 text-white font-bold px-5 py-1.5 rounded-xl shadow-lg text-sm border border-amber-400/80 transition-colors"
                             >
                                 📺 投屏
                             </button>
                             <button
                                 onClick={() => setScreenDisplayMode('background')}
-                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'background' ? 'bg-sky-500/85 text-white border-sky-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                                className={`font-bold px-3.5 py-1.5 rounded-xl shadow-lg text-sm border transition-colors ${screenDisplayMode === 'background' ? 'bg-sky-500/85 text-white border-sky-300' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-600'}`}
                             >
                                 背景
                             </button>
                             <button
                                 onClick={() => setScreenDisplayMode('kv')}
-                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'kv' ? 'bg-fuchsia-500/85 text-white border-fuchsia-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                                className={`font-bold px-3.5 py-1.5 rounded-xl shadow-lg text-sm border transition-colors ${screenDisplayMode === 'kv' ? 'bg-fuchsia-500/85 text-white border-fuchsia-300' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-600'}`}
                             >
                                 KV
                             </button>
                             <button
                                 onClick={() => setScreenDisplayMode('black')}
-                                className={`font-bold px-3.5 py-1.5 rounded-lg shadow-lg text-sm border transition-colors ${screenDisplayMode === 'black' ? 'bg-slate-950 text-white border-slate-300' : 'bg-slate-700/85 hover:bg-slate-600 text-slate-200 border-slate-500'}`}
+                                className={`font-bold px-3.5 py-1.5 rounded-xl shadow-lg text-sm border transition-colors ${screenDisplayMode === 'black' ? 'bg-slate-950 text-white border-slate-300' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-600'}`}
                             >
                                 黑屏
                             </button>
@@ -154,15 +157,15 @@ export default function Admin() {
                     </div>
 
                     {/* Phase buttons */}
-                    <div className="grid grid-cols-6 gap-2">
+                    <div className="grid grid-cols-6 gap-2.5">
                         {phases.map((ph) => (
                             <button
                                 key={ph.value}
                                 onClick={() => updateState({ ...gameState, adminRound: ph.value })}
                                 className={`relative py-3 px-2 rounded-xl font-bold text-sm transition-all shadow-md flex flex-col items-center gap-1 overflow-hidden ${
                                     gameState.adminRound === ph.value
-                                        ? 'bg-gradient-to-b from-teal-600 to-teal-800 text-white shadow-[0_0_14px_rgba(20,184,166,0.6)] scale-[1.03]'
-                                        : 'bg-slate-700/80 border border-slate-600 hover:bg-slate-600 text-slate-300'
+                                        ? 'bg-gradient-to-b from-teal-500 to-cyan-700 text-white shadow-[0_0_20px_rgba(34,211,238,0.28)] scale-[1.03]'
+                                        : 'bg-slate-800/78 border border-slate-600 hover:bg-slate-700 text-slate-300'
                                 }`}
                             >
                                 <span className="text-xl">{ph.icon}</span>
@@ -239,8 +242,8 @@ export default function Admin() {
 
 
                 {/* RIGHT: Compact theme selector */}
-                <div className="flex-shrink-0 w-44 flex flex-col gap-2 border-l border-slate-700 pl-5">
-                    <div className="text-xs font-bold text-slate-400 mb-1 border-l-4 border-pink-500 pl-2">大屏主题</div>
+                <div className="flex-shrink-0 w-48 flex flex-col gap-2 border-l border-slate-700/80 pl-6">
+                    <div className="text-xs font-bold text-slate-400 mb-1 border-l-4 border-pink-500 pl-2 tracking-[0.18em] uppercase">大屏主题</div>
                     <button
                         onClick={() => updateState({ ...gameState, theme: 'theme-background' })}
                         className={`py-2 px-3 rounded-lg font-bold transition-all text-sm text-left flex items-center gap-2 ${

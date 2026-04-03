@@ -1,206 +1,322 @@
+import PropTypes from 'prop-types';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
-import PlayerIdentity from '../common/PlayerIdentity';
+import { formatPlayerNumber, getPlayerName } from '../../utils/playerIdentity';
+
+const SCORE_REVEAL_DURATION = 1200;
+const RESULT_REVEAL_DELAY = SCORE_REVEAL_DURATION + 180;
+
+function getCenterOutcomeText({ winner }) {
+    if (winner === 'both_pending') {
+        return [{ text: '挑战者与擂主均进入待定区', variant: 'primary' }];
+    }
+
+    if (winner === 'master') {
+        return [
+            { text: '挑战者进入待定区', variant: 'secondary' },
+            { text: '擂主直接晋级十强', variant: 'primary' }
+        ];
+    }
+
+    return [];
+}
+
+function getCardVariant({ showOutcome, winner, role }) {
+    if (!showOutcome) {
+        return {
+            scale: 1,
+            opacity: 1,
+            y: 0,
+            boxShadow: '0 24px 48px rgba(2,6,23,0.26)',
+            borderColor: 'rgba(255,255,255,0.1)',
+            transition: { duration: 0.2 }
+        };
+    }
+
+    if (winner === 'both_pending') {
+        return {
+            scale: 0.9,
+            y: 10,
+            opacity: 1,
+            boxShadow: '0 16px 34px rgba(2,6,23,0.16)',
+            borderColor: 'rgba(255,255,255,0.16)',
+            transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
+        };
+    }
+
+    if (winner === 'master') {
+        if (role === 'master') {
+            return {
+                scale: 1.1,
+                y: 0,
+                opacity: 1,
+                boxShadow: '0 0 56px rgba(255,255,255,0.32)',
+                borderColor: 'rgba(255,255,255,0.24)',
+                transition: { duration: 0.76, ease: [0.22, 1, 0.36, 1] }
+            };
+        }
+
+        return {
+            scale: 0.9,
+            opacity: 0.9,
+            y: 0,
+            boxShadow: '0 16px 30px rgba(2,6,23,0.18)',
+            borderColor: 'rgba(255,255,255,0.06)',
+            transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
+        };
+    }
+
+    return {
+        scale: 1,
+        opacity: 1,
+        y: 0,
+        boxShadow: '0 24px 48px rgba(2,6,23,0.26)',
+        borderColor: 'rgba(255,255,255,0.1)',
+        transition: { duration: 0.2 }
+    };
+}
+
+function RollingScore({ value, active, runKey }) {
+    const [displayValue, setDisplayValue] = useState(active ? 0 : Number(value || 0));
+    const frameRef = useRef(null);
+
+    useEffect(() => {
+        if (frameRef.current) {
+            cancelAnimationFrame(frameRef.current);
+        }
+
+        if (!active) {
+            setDisplayValue(Number(value || 0));
+            return undefined;
+        }
+
+        const target = Number(value || 0);
+        const duration = SCORE_REVEAL_DURATION;
+        let startTime = null;
+
+        setDisplayValue(0);
+
+        const tick = (timestamp) => {
+            if (startTime === null) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - ((1 - progress) * (1 - progress) * (1 - progress));
+            const current = target * eased;
+
+            setDisplayValue(current);
+
+            if (progress < 1) {
+                frameRef.current = requestAnimationFrame(tick);
+            } else {
+                setDisplayValue(target);
+            }
+        };
+
+        frameRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            if (frameRef.current) {
+                cancelAnimationFrame(frameRef.current);
+            }
+        };
+    }, [active, runKey, value]);
+
+    return <span>{displayValue.toFixed(2)}</span>;
+}
+
+function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOutcome, winner }) {
+
+    return (
+        <motion.div
+            animate={getCardVariant({ showOutcome, winner, role })}
+            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(324px,41.4vh,414px)] rounded-[42px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.014))] backdrop-blur-[8px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_rgba(2,6,23,0.26)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)]"
+        >
+            <div className="text-[clamp(0.95rem,1.25vw,1.15rem)] font-black tracking-[0.28em] uppercase text-white/68 text-center">
+                {roleLabel}
+            </div>
+
+            <div className="mt-[clamp(14px,1.8vh,22px)] rounded-[32px] p-[4px] bg-[linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.06))] shadow-[0_14px_28px_rgba(2,6,23,0.2)]">
+                <img
+                    src={getFullAvatarUrl(player?.avatar)}
+                    alt={getPlayerName(player, role === 'master' ? '未知擂主' : '未知选手')}
+                    className="w-[clamp(132px,12vw,172px)] h-[clamp(132px,12vw,172px)] rounded-[28px] border border-white/20 object-cover block"
+                />
+            </div>
+
+            <div className="mt-[clamp(16px,1.8vh,24px)] w-full text-center px-3">
+                <div className="text-[clamp(0.86rem,1vw,1rem)] font-black tracking-[0.22em] text-white/54 uppercase">
+                    No.{formatPlayerNumber(player)}
+                </div>
+                <div className="mt-2 text-[clamp(1.4rem,2vw,1.9rem)] font-black text-white leading-tight break-words">
+                    {getPlayerName(player, role === 'master' ? '未知擂主' : '未知选手')}
+                </div>
+            </div>
+
+            <div className="mt-[clamp(18px,2vh,28px)] min-h-[clamp(72px,8vh,96px)] flex items-center justify-center w-full text-center">
+                {showScoreRoll ? (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.88, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.24, ease: 'easeOut' }}
+                        className="text-[clamp(2.3rem,4vw,3.8rem)] leading-none font-mono font-black text-white"
+                    >
+                        <RollingScore value={scoreValue} active={showScoreRoll} runKey={`${role}-${scoreValue}`} />
+                    </motion.div>
+                ) : (
+                <div className="w-full flex items-center justify-center text-[clamp(2rem,3.4vw,3.4rem)] leading-none font-black font-mono tracking-[0.22em] text-white/42 whitespace-nowrap">
+                        ???
+                    </div>
+                )}
+            </div>
+
+        </motion.div>
+    );
+}
 
 export default function PkBattle({ gameState }) {
     const pkMatches = gameState.pkMatches || [];
-    // 使用 screenMatchIndex 精确选择大屏展示的对战，该字段由管理后台独立控制
     const screenIdx = gameState.screenMatchIndex ?? 0;
     const activeMatch = pkMatches[screenIdx] || null;
+    const [resultReady, setResultReady] = useState(false);
+
+    const isFinished = activeMatch?.status === 'finished';
+    const winner = activeMatch?.winner;
+    const cardLayoutKey = `${screenIdx}-${isFinished ? 'finished' : 'live'}-${activeMatch?.challengerScore ?? ''}-${activeMatch?.masterScore ?? ''}-${winner ?? ''}`;
+
+    useEffect(() => {
+        if (!isFinished) {
+            setResultReady(false);
+            return;
+        }
+
+        setResultReady(false);
+        const timer = window.setTimeout(() => {
+            setResultReady(true);
+        }, RESULT_REVEAL_DELAY);
+
+        return () => window.clearTimeout(timer);
+    }, [cardLayoutKey, isFinished]);
 
     if (!activeMatch) {
         return <div className="text-center mt-32 text-6xl text-slate-700 font-bold loading-dots">16强对战初始化中...</div>;
     }
 
-    const cInfo = gameState.players.find(p => p.id === activeMatch.challengerId);
-    const mInfo = gameState.players.find(p => p.id === activeMatch.masterId);
+    const cInfo = gameState.players.find((p) => p.id === activeMatch.challengerId);
+    const mInfo = gameState.players.find((p) => p.id === activeMatch.masterId);
 
-    const isFinished = activeMatch.status === 'finished';
-    const winner = activeMatch.winner; // 'master', 'both_pending'
-    const isMasterWin = winner === 'master';
-    const isBothPending = winner === 'both_pending';
-    const pairResultText = isMasterWin ? '晋级 & 淘汰' : isBothPending ? '待定 & 待定' : '结果待确认';
-    const cardLayoutKey = `${screenIdx}-${isFinished ? 'finished' : 'live'}`;
-
-    // Animation variants
-    const getCardVariant = (role) => {
-        if (!isFinished) {
-            return {
-                scale: 1,
-                opacity: 1,
-                y: 0,
-                filter: 'grayscale(0%)',
-                boxShadow: 'none',
-                zIndex: 1,
-                transition: { duration: 0 }
-            };
-        }
-
-        if (winner === 'both_pending') {
-            // 情形B: 两人都待定
-            return {
-                scale: 0.8,
-                opacity: 0.82,
-                y: 26,
-                filter: 'grayscale(60%)',
-                transition: { duration: 0.28, ease: 'easeOut' }
-            };
-        }
-
-        if (winner === 'master') {
-            if (role === 'master') {
-                // 擂主晋级 (情形A)
-                return {
-                    scale: 1.007,
-                    y: -4,
-                    boxShadow: "0 0 50px rgba(251, 191, 36, 0.58)",
-                    borderColor: "rgba(251, 191, 36, 1)",
-                    zIndex: 10,
-                    transition: { duration: 0.38, ease: 'easeOut' }
-                };
-            } else {
-                // 挑战者淘汰 (情形A)
-                return {
-                    scale: 0.74,
-                    opacity: 1,
-                    y: 0,
-                    filter: 'grayscale(0%)',
-                    transition: { duration: 0.75 }
-                };
-            }
-        }
-        return {};
-    };
+    const showScoreRoll = isFinished;
+    const showOutcome = isFinished && resultReady;
+    const centerOutcomeLines = getCenterOutcomeText({ winner });
 
     return (
-        <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(4px,0.8vh,10px)] pb-[clamp(6px,1vh,12px)] overflow-hidden">
-            <h2 className="text-[clamp(1.7rem,3vw,2.2rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(4px,0.8vh,10px)] text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400 tracking-[0.22em] italic">1V1 BATTLE</h2>
-
-            <div className="w-full min-h-[clamp(40px,6vh,62px)] flex items-center justify-center">
-                <AnimatePresence mode="wait" initial={false}>
-                    {isFinished && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className={`px-[clamp(16px,2vw,28px)] py-[clamp(5px,0.8vh,8px)] rounded-2xl border-2 text-[clamp(1rem,1.9vw,1.45rem)] font-black tracking-[0.14em] ${isMasterWin ? 'bg-emerald-600/30 border-emerald-400 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.45)]' : isBothPending ? 'bg-cyan-700/30 border-cyan-300 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'bg-amber-700/30 border-amber-300 text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`}
-                    >
-                            结果：{pairResultText}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+        <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,0.9vh,12px)] pb-[clamp(8px,1.2vh,16px)] overflow-hidden">
+            <h2 className="text-[clamp(1.8rem,3vw,2.3rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(8px,1.2vh,14px)] text-transparent bg-clip-text bg-[linear-gradient(to_right,rgba(255,255,255,0.96),rgba(220,240,255,0.78))] tracking-[0.22em] italic">
+                1V1 BATTLE
+            </h2>
 
             <motion.div
-                key={cardLayoutKey}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`w-full max-w-[1400px] px-[clamp(8px,1.2vw,16px)] pb-[clamp(2px,0.6vh,6px)] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center justify-items-center gap-[clamp(14px,2vw,30px)] ${isFinished ? 'mt-[clamp(2px,0.4vh,6px)]' : 'mt-[clamp(4px,1vh,14px)]'}`}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="w-full max-w-[1480px] px-[clamp(12px,1.4vw,20px)] pb-[clamp(4px,0.8vh,10px)] grid grid-cols-[minmax(0,1fr)_clamp(220px,20vw,300px)_minmax(0,1fr)] items-start justify-items-center gap-[clamp(8px,1.2vw,20px)] mt-[clamp(0px,0.3vh,4px)] -translate-y-[clamp(20px,2.4vh,34px)]"
             >
-                {/* 挑战者卡片 */}
-                <motion.div
-                    animate={getCardVariant('challenger')}
-                    className="bg-[var(--color-card-bg)] border-2 border-teal-500/50 rounded-3xl px-[clamp(12px,1.4vw,18px)] pt-[clamp(8px,1vh,14px)] pb-[clamp(8px,1vh,14px)] flex flex-col items-center w-[clamp(250px,26vw,360px)] min-h-[clamp(250px,34vh,310px)] overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
-                >
-                    <div className="w-full bg-teal-500/85 text-white text-[clamp(0.65rem,1vw,0.8rem)] font-bold tracking-[0.2em] text-center rounded-md py-1">挑战者</div>
-                    <div className="rounded-[1.7rem] p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(20,184,166,0.25)] mt-[clamp(6px,1vh,12px)]">
-                        <img src={getFullAvatarUrl(cInfo?.avatar)} alt={cInfo?.name} className="w-28 h-28 rounded-[1.45rem] border-[3px] border-teal-400/50 object-cover block" />
-                    </div>
-                    <PlayerIdentity
-                        player={cInfo}
-                        fallbackName="未知选手"
-                        className="mt-[clamp(6px,1vh,10px)] min-h-[48px] justify-center"
-                        numberClassName="text-[clamp(0.7rem,0.9vw,0.82rem)] text-slate-400"
-                        nameClassName="text-[clamp(1rem,1.6vw,1.4rem)] font-black tracking-wide"
-                    />
+                <BattleCard
+                    player={cInfo}
+                    role="challenger"
+                    roleLabel="挑战者"
+                    scoreValue={activeMatch.challengerScore}
+                    showScoreRoll={showScoreRoll}
+                    showOutcome={showOutcome}
+                    winner={winner}
+                />
 
-                    <div className="mt-[clamp(4px,0.8vh,8px)] text-center min-h-[54px] flex items-center justify-center w-full">
-                        {isFinished ? (
+                <div className="relative flex flex-col items-center justify-center gap-4 mt-[clamp(132px,14vh,176px)] w-[clamp(220px,20vw,300px)] z-20">
+                    <motion.div
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.28, ease: 'easeOut' }}
+                        className="text-[clamp(2.2rem,4vw,3.6rem)] font-black text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.94),rgba(255,255,255,0.36))] italic drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]"
+                    >
+                        VS
+                    </motion.div>
+
+                    <AnimatePresence mode="wait" initial={false}>
+                        {showOutcome && centerOutcomeLines.length > 0 && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                transition={{ duration: 0.22, ease: 'easeOut' }}
-                                className={`text-[clamp(1.8rem,3vw,2.8rem)] leading-none font-mono font-black ${isMasterWin ? 'text-slate-500' : 'text-transparent bg-clip-text bg-gradient-to-b from-white to-teal-300'}`}
+                                key={`result-${cardLayoutKey}`}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.28, ease: 'easeOut' }}
+                                className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-[clamp(220px,20vw,300px)] flex flex-col items-center gap-1.5 text-center whitespace-pre-line"
                             >
-                                {activeMatch.challengerScore?.toFixed(2)}
-                            </motion.div>
-                        ) : (
-                            <div className="text-[1.6rem] text-teal-300 font-bold opacity-60 animate-pulse">演唱中...</div>
-                        )}
-                    </div>
-
-                    <AnimatePresence>
-                        {isFinished && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={`w-full mt-2 py-2 text-center text-[1rem] font-black tracking-[0.12em] text-white rounded-xl shadow-md border-2 ${isBothPending ? 'bg-slate-700 border-slate-500 text-teal-200' : isMasterWin ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-amber-800/60 border-amber-500 text-amber-100'}`}
-                            >
-                                {isBothPending ? '🛡️ 待定池' : isMasterWin ? '❌ 直接淘汰' : '⚠️ 结果待确认'}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
-
-                {/* VS 图标 */}
-                <motion.div
-                    animate={{
-                        scale: isFinished ? 0.62 : 1,
-                        opacity: isFinished ? 0.3 : 1
-                    }}
-                    transition={{ duration: 0.24, ease: 'easeOut' }}
-                    className="text-[clamp(2rem,3.6vw,3.2rem)] mt-[clamp(4px,0.8vh,8px)] font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 to-emerald-700 italic drop-shadow-lg z-20"
-                >
-                    VS
-                </motion.div>
-
-                {/* 擂主卡片 */}
-                <motion.div
-                    animate={getCardVariant('master')}
-                    className="bg-[var(--color-card-bg)] border-2 border-emerald-500/50 rounded-3xl px-[clamp(12px,1.4vw,18px)] pt-[clamp(8px,1vh,14px)] pb-[clamp(8px,1vh,14px)] flex flex-col items-center w-[clamp(250px,26vw,360px)] min-h-[clamp(250px,34vh,310px)] overflow-hidden backdrop-blur-xl text-[var(--color-text-main)]"
-                >
-                    <div className="w-full bg-emerald-500/85 text-white text-[clamp(0.65rem,1vw,0.8rem)] font-bold tracking-[0.2em] text-center rounded-md py-1">擂主</div>
-                    <div className="rounded-[1.7rem] p-[3px] bg-gradient-to-b from-white/40 to-white/5 shadow-[0_6px_24px_rgba(0,0,0,0.6),0_0_20px_rgba(16,185,129,0.25)] mt-[clamp(6px,1vh,12px)]">
-                        <img src={getFullAvatarUrl(mInfo?.avatar)} alt={mInfo?.name} className="w-28 h-28 rounded-[1.45rem] border-[3px] border-emerald-400/50 object-cover block" />
-                    </div>
-                    <PlayerIdentity
-                        player={mInfo}
-                        fallbackName="未知擂主"
-                        className="mt-[clamp(6px,1vh,10px)] min-h-[48px] justify-center"
-                        numberClassName="text-[clamp(0.7rem,0.9vw,0.82rem)] text-slate-400"
-                        nameClassName="text-[clamp(1rem,1.6vw,1.4rem)] font-black tracking-wide"
-                    />
-
-                    <div className="mt-[clamp(4px,0.8vh,8px)] text-center min-h-[54px] flex items-center justify-center w-full">
-                        {isFinished ? (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                transition={{ duration: 0.22, ease: 'easeOut', delay: 0.1 }}
-                                className={`text-[clamp(1.8rem,3vw,2.8rem)] leading-none font-mono font-black ${isMasterWin ? 'text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-300' : 'text-slate-400'}`}
-                            >
-                                {activeMatch.masterScore?.toFixed(2)}
-                            </motion.div>
-                        ) : (
-                            <div className="text-[1.6rem] text-emerald-300 font-bold opacity-60 animate-pulse">演唱中...</div>
-                        )}
-                    </div>
-
-                    <AnimatePresence>
-                        {isFinished && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={`w-full mt-2 py-2 text-center text-[1rem] font-black tracking-[0.12em] text-white rounded-xl shadow-md border-2 ${isBothPending ? 'bg-slate-700 border-slate-500 text-teal-200' : isMasterWin ? 'bg-emerald-600 border-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.4)]' : 'bg-amber-800/60 border-amber-500 text-amber-100'}`}
-                            >
-                                {isBothPending ? '🛡️ 待定池' : isMasterWin ? '🏆 直接晋级十强' : '⚠️ 结果待确认'}
+                                {centerOutcomeLines.map((line) => (
+                                    <div
+                                        key={line.text}
+                                        className={line.variant === 'secondary'
+                                            ? 'text-[clamp(0.96rem,1.2vw,1.08rem)] font-black italic tracking-[0.1em] leading-[1.45] text-white/52'
+                                            : 'text-[clamp(1.1rem,1.5vw,1.32rem)] font-black italic tracking-[0.12em] leading-[1.5] text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.94),rgba(255,255,255,0.46))] drop-shadow-[0_0_14px_rgba(255,255,255,0.14)]'
+                                        }
+                                    >
+                                        {line.text}
+                                    </div>
+                                ))}
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </motion.div>
+                </div>
+
+                <BattleCard
+                    player={mInfo}
+                    role="master"
+                    roleLabel="擂主"
+                    scoreValue={activeMatch.masterScore}
+                    showScoreRoll={showScoreRoll}
+                    showOutcome={showOutcome}
+                    winner={winner}
+                />
             </motion.div>
         </div>
     );
 }
+
+RollingScore.propTypes = {
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    active: PropTypes.bool.isRequired,
+    runKey: PropTypes.string.isRequired,
+};
+
+BattleCard.propTypes = {
+    player: PropTypes.shape({
+        id: PropTypes.number,
+        number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        name: PropTypes.string,
+        avatar: PropTypes.string,
+    }),
+    roleLabel: PropTypes.string.isRequired,
+    role: PropTypes.oneOf(['challenger', 'master']).isRequired,
+    scoreValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    showScoreRoll: PropTypes.bool.isRequired,
+    showOutcome: PropTypes.bool.isRequired,
+    winner: PropTypes.string,
+};
+
+PkBattle.propTypes = {
+    gameState: PropTypes.shape({
+        pkMatches: PropTypes.arrayOf(PropTypes.shape({
+            challengerId: PropTypes.number.isRequired,
+            masterId: PropTypes.number.isRequired,
+            challengerScore: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            masterScore: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            status: PropTypes.string,
+            winner: PropTypes.string,
+        })),
+        screenMatchIndex: PropTypes.number,
+        players: PropTypes.arrayOf(PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            name: PropTypes.string,
+            avatar: PropTypes.string,
+        })).isRequired,
+    }).isRequired,
+};

@@ -35,6 +35,7 @@ export const getPlayerLatestScore = (player, pkMatches = []) => {
 export const deriveFinalSettlement = (gameState) => {
     const players = gameState?.players || [];
     const pkMatches = gameState?.pkMatches || [];
+    const playerById = new Map(players.map((player) => [player.id, player]));
 
     const sortedByRound1 = [...players].sort((a, b) => b.score - a.score || a.id - b.id);
     const rankById = new Map(sortedByRound1.map((player, index) => [player.id, index + 1]));
@@ -57,11 +58,16 @@ export const deriveFinalSettlement = (gameState) => {
         ? round1ReferenceTotal / round1ReferencePlayers.length
         : 0;
 
-    const masterRows = masters.map((master, index) => {
-        const match = matchByMasterId.get(master.id);
-        const fallbackChallenger = challengers[index] || null;
+    const masterById = new Map(masters.map((player) => [player.id, player]));
+    const challengerById = new Map(challengers.map((player) => [player.id, player]));
+    const usedMasterIds = new Set();
+    const usedChallengerIds = new Set();
+
+    const buildMasterRow = (master, preferredChallenger = null, preferredMatch = null) => {
+        const match = preferredMatch || matchByMasterId.get(master.id) || null;
+        const fallbackChallenger = preferredChallenger || null;
         const challenger = match
-            ? players.find((player) => player.id === match.challengerId) || fallbackChallenger
+            ? challengerById.get(match.challengerId) || playerById.get(match.challengerId) || fallbackChallenger
             : fallbackChallenger;
 
         return {
@@ -72,7 +78,28 @@ export const deriveFinalSettlement = (gameState) => {
             masterScore: match?.status === 'finished' ? toNumber(match.masterScore) : getPlayerLatestScore(master, pkMatches),
             challengerScore: match?.status === 'finished' ? toNumber(match.challengerScore) : getPlayerLatestScore(challenger, pkMatches)
         };
+    };
+
+    const pairedRows = pkMatches
+        .map((match) => {
+            const master = masterById.get(match.masterId);
+            if (!master) return null;
+
+            const challenger = challengerById.get(match.challengerId) || playerById.get(match.challengerId) || null;
+            usedMasterIds.add(master.id);
+            if (challenger) usedChallengerIds.add(challenger.id);
+            return buildMasterRow(master, challenger, match);
+        })
+        .filter(Boolean);
+
+    const remainingMasters = masters.filter((player) => !usedMasterIds.has(player.id));
+    const remainingChallengers = challengers.filter((player) => !usedChallengerIds.has(player.id));
+    const fallbackRows = remainingMasters.map((master, index) => {
+        const fallbackChallenger = remainingChallengers[index] || null;
+        return buildMasterRow(master, fallbackChallenger);
     });
+
+    const masterRows = [...pairedRows, ...fallbackRows];
 
     const pendingMap = new Map();
     const pendingReasonMap = new Map();

@@ -1,32 +1,32 @@
 :root,
 .theme-background {
-  --color-bg-base: #07111e;
-  --color-bg-screen: #0b1627;
+  --color-bg-base: #050d18;
+  --color-bg-screen: #08111f;
   --color-text-main: #f8fafc;
-  --color-text-muted: #d3e3f7;
-  --color-card-bg: rgba(7, 15, 28, 0.64);
-  --color-card-border: rgba(186, 212, 255, 0.16);
-  --color-glow-1: rgba(56, 189, 248, 0.18);
-  --color-glow-2: rgba(16, 185, 129, 0.14);
-  --title-gradient-from: #fff8da;
-  --title-gradient-to: #93c5fd;
+  --color-text-muted: #c7d8ee;
+  --color-card-bg: rgba(6, 14, 28, 0.7);
+  --color-card-border: rgba(196, 220, 255, 0.18);
+  --color-glow-1: rgba(56, 189, 248, 0.14);
+  --color-glow-2: rgba(251, 191, 36, 0.1);
+  --title-gradient-from: #fff5cf;
+  --title-gradient-to: #7dd3fc;
 
-  --rank-king-bg: rgba(88, 52, 17, 0.84);
+  --rank-king-bg: rgba(86, 49, 12, 0.82);
   --rank-king-border: #fbbf24;
-  --rank-king-shadow: 0 12px 32px rgba(251, 191, 36, 0.18);
+  --rank-king-shadow: 0 18px 40px rgba(251, 191, 36, 0.16);
   --rank-king-text: #fff7ed;
 
-  --rank-master-bg: rgba(10, 82, 107, 0.72);
+  --rank-master-bg: rgba(12, 79, 104, 0.72);
   --rank-master-border: #22d3ee;
-  --rank-master-shadow: 0 10px 28px rgba(34, 211, 238, 0.16);
+  --rank-master-shadow: 0 16px 34px rgba(34, 211, 238, 0.14);
   --rank-master-text: #f0fdfa;
 
-  --rank-challenger-bg: rgba(29, 78, 216, 0.66);
+  --rank-challenger-bg: rgba(26, 72, 187, 0.68);
   --rank-challenger-border: #60a5fa;
-  --rank-challenger-shadow: 0 10px 28px rgba(96, 165, 250, 0.15);
+  --rank-challenger-shadow: 0 16px 34px rgba(96, 165, 250, 0.13);
   --rank-challenger-text: #eff6ff;
 
-  --rank-eliminated-bg: rgba(15, 23, 42, 0.82);
+  --rank-eliminated-bg: rgba(10, 18, 34, 0.82);
   --rank-eliminated-border: rgba(100, 116, 139, 0.55);
   --rank-eliminated-shadow: none;
   --rank-eliminated-text: #94a3b8;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import PlayerIdentity from '../common/PlayerIdentity';
@@ -88,6 +89,32 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         const match = pkMatches[activeMatchIndex];
         if (!match || match.status !== 'finished') return;
         handleSubmitScore();
+    };
+
+    const handleClearCurrentScores = () => {
+        const match = pkMatches[activeMatchIndex];
+        if (!match) return;
+        if (!window.confirm('确定清空当前对战的分数与结果吗？这会把该场次恢复为可重新打分状态。')) return;
+
+        const newMatches = [...pkMatches];
+        newMatches[activeMatchIndex] = {
+            ...match,
+            challengerScore: 0,
+            masterScore: 0,
+            winner: null,
+            status: 'active'
+        };
+
+        const newPlayers = gameState.players.map((player) => {
+            if (player.id === match.challengerId || player.id === match.masterId) {
+                return { ...player, status: 'active' };
+            }
+            return player;
+        });
+
+        setCScore('');
+        setMScore('');
+        updateState({ ...gameState, pkMatches: newMatches, players: newPlayers });
     };
 
     const handleSeedData = () => {
@@ -259,6 +286,10 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                         onClick={handleEditFinishedScore}
                                         className="w-full bg-amber-700 hover:bg-amber-600 border border-amber-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
                                     >保存修改并重新结算</button>
+                                    <button
+                                        onClick={handleClearCurrentScores}
+                                        className="w-full bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
+                                    >清空当前对战分数</button>
                                 </div>
                             ) : isActive ? (
                                 <div className="flex flex-col gap-1.5">
@@ -291,6 +322,10 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
                                         onClick={handleSubmitScore}
                                         className="w-full bg-teal-700 hover:bg-teal-600 border border-teal-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
                                     >确认提交</button>
+                                    <button
+                                        onClick={handleClearCurrentScores}
+                                        className="w-full bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
+                                    >清空当前对战分数</button>
                                 </div>
                             ) : (
                                 <button
@@ -312,3 +347,27 @@ export default function AdminRound2({ gameState, updateState, adminMatchIndex, s
         </div>
     );
 }
+
+AdminRound2.propTypes = {
+    gameState: PropTypes.shape({
+        pkMatches: PropTypes.arrayOf(PropTypes.shape({
+            challengerId: PropTypes.number.isRequired,
+            masterId: PropTypes.number.isRequired,
+            challengerScore: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            masterScore: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            winner: PropTypes.string,
+            status: PropTypes.string,
+        })),
+        screenMatchIndex: PropTypes.number,
+        players: PropTypes.arrayOf(PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            name: PropTypes.string,
+            avatar: PropTypes.string,
+            number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            status: PropTypes.string,
+        })).isRequired,
+    }).isRequired,
+    updateState: PropTypes.func.isRequired,
+    adminMatchIndex: PropTypes.number,
+    setAdminMatchIndex: PropTypes.func.isRequired,
+};

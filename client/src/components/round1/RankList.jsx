@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PropTypes from 'prop-types';
 import { getFullAvatarUrl } from '../../utils/avatar';
+import { formatPlayerNumber } from '../../utils/playerIdentity';
 import PlayerIdentity from '../common/PlayerIdentity';
+
+const GROUP_CARD_CLASS = 'rounded-[36px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.024),rgba(255,255,255,0.01))] backdrop-blur-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_30px_rgba(2,6,23,0.22)]';
 
 export default function RankList({ gameState }) {
     const { players, currentGroup, round1Mode } = gameState;
@@ -18,7 +22,7 @@ export default function RankList({ gameState }) {
         });
 
     const getRankZoneStyle = (index, isGlobal) => {
-        if (!isGlobal) return "bg-gradient-to-br from-emerald-500/24 to-cyan-900/10 border-emerald-300/35 text-teal-50 shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_4px_10px_rgba(2,6,23,0.22)] border backdrop-blur-md";
+        if (!isGlobal) return "bg-gradient-to-br from-emerald-500/20 via-cyan-900/10 to-slate-950/18 border-emerald-300/35 text-teal-50 shadow-[inset_0_1px_10px_rgba(255,255,255,0.12),0_10px_22px_rgba(2,6,23,0.22)] border backdrop-blur-xl";
         if (index < 2) return "bg-[var(--rank-king-bg)] border-[var(--rank-king-border)] text-[var(--rank-king-text)] shadow-[var(--rank-king-shadow)] border-2";
         if (index < 10) return "bg-[var(--rank-master-bg)] border-[var(--rank-master-border)] text-[var(--rank-master-text)] shadow-[var(--rank-master-shadow)] border";
         if (index < 18) return "bg-[var(--rank-challenger-bg)] border-[var(--rank-challenger-border)] text-[var(--rank-challenger-text)] shadow-[var(--rank-challenger-shadow)] border";
@@ -31,34 +35,28 @@ export default function RankList({ gameState }) {
             layout
             initial={{ opacity: 0, y: 20, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 20, delay: Math.min(index * 0.02, 0.25) }}
-            className={`relative ${compactGroup ? 'rounded-[18px] min-h-[96px]' : 'aspect-[3/4]'} border backdrop-blur-md overflow-hidden transition-all duration-300 shadow-[inset_0_1px_8px_rgba(255,255,255,0.12),0_6px_16px_rgba(2,6,23,0.3)] ${getRankZoneStyle(index, isGlobal)}`}
+            exit={{ opacity: 0, y: -18, scale: 0.96, transition: { duration: 0.24, ease: 'easeInOut' } }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20, delay: Math.min(index * 0.03, 0.25) }}
+            className={`relative ${compactGroup ? `${GROUP_CARD_CLASS} h-[360px] px-7 py-5 overflow-hidden` : 'aspect-[3/4]'} ${compactGroup ? '' : `border backdrop-blur-xl overflow-hidden transition-all duration-300 shadow-[inset_0_1px_10px_rgba(255,255,255,0.12),0_12px_26px_rgba(2,6,23,0.28)] ${getRankZoneStyle(index, isGlobal)}`}`}
         >
-            <div className={`absolute top-1.5 left-1.5 bg-black/50 ${compactGroup ? 'text-[9px] px-1.5 py-0.5' : 'text-[10px] px-2 py-0.5'} rounded-md font-black text-teal-200 tracking-wide z-10`}>
-                {isGlobal ? `NO.${index + 1}` : `G${currentGroup}-${index + 1}`}
-            </div>
-
-            <div className={`h-full ${compactGroup ? 'flex items-center gap-3 px-3 py-2 text-left' : 'flex flex-col items-center justify-between text-center p-2.5'}`}>
+            <div className={`h-full ${compactGroup ? 'flex flex-col items-center justify-center text-center px-2 gap-4' : 'flex flex-col items-center justify-between text-center p-3'}`}>
                 <img
                     src={getFullAvatarUrl(player.avatar)}
                     alt={player.name}
-                    className={`${compactGroup ? 'w-11 h-11' : large ? 'w-16 h-16' : 'w-12 h-12'} rounded-xl border border-white/25 object-cover block`}
+                    className={`${compactGroup ? 'w-[132px] h-[128px]' : large ? 'w-16 h-16' : 'w-12 h-12'} rounded-[30px] border border-white/25 object-cover block shadow-[0_8px_18px_rgba(2,6,23,0.18)]`}
                 />
 
                 {compactGroup ? (
                     <>
-                        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-                            <PlayerIdentity
-                                player={player}
-                                compact
-                                center={false}
-                                className="w-full"
-                                numberClassName="text-[10px] text-slate-300 tracking-[0.16em]"
-                                nameClassName="text-[14px] font-black text-white truncate text-left"
-                            />
-                            <div className="text-[10px] text-slate-300 tracking-[0.16em] uppercase">当前组内排名</div>
+                        <div className="min-w-0 w-full flex flex-col items-center justify-center px-2 gap-2">
+                            <div className="text-[12px] font-black tracking-[0.2em] text-white/58 uppercase text-center">
+                                No.{formatPlayerNumber(player)}
+                            </div>
+                            <div className="text-[21px] font-black text-white leading-snug break-words text-center max-w-full">
+                                {player.name}
+                            </div>
                         </div>
-                        <div className="text-[22px] font-black font-mono text-teal-100 leading-none shrink-0">
+                        <div className="text-[38px] font-black font-mono text-teal-100 leading-none shrink-0 text-center">
                             <ScoreCounter value={player.score} />
                         </div>
                     </>
@@ -86,10 +84,24 @@ export default function RankList({ gameState }) {
         </motion.div>
     );
 
+    Card.propTypes = {
+        player: PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            name: PropTypes.string.isRequired,
+            avatar: PropTypes.string,
+            score: PropTypes.number
+        }).isRequired,
+        index: PropTypes.number.isRequired,
+        isGlobal: PropTypes.bool.isRequired,
+        large: PropTypes.bool,
+        compactGroup: PropTypes.bool
+    };
+
     return (
         <div className="w-full h-full max-w-[98%] mx-auto py-1.5 flex flex-col">
             {!isGroupMode && (
-                <div className="flex justify-between items-end mb-2 px-1">
+                <div className="flex justify-between items-end mb-2.5 px-1">
                     <h2 className="text-[clamp(1.25rem,1.9vw,1.9rem)] font-bold tracking-[0.18em] border-l-4 border-teal-500 pl-3 text-[var(--color-text-main)]">
                         第一轮：30进18 全局排位战
                     </h2>
@@ -98,28 +110,21 @@ export default function RankList({ gameState }) {
 
             {isGroupMode ? (
                 <div className="flex-1 min-h-0 flex items-center justify-center">
-                    <div className="w-full max-w-[1320px] grid grid-cols-2 gap-4 px-4">
-                        <div className="grid grid-cols-1 gap-3">
+                    <div className="w-full max-w-[1480px] px-14 py-2 -mt-10">
+                        <div className="grid grid-cols-5 gap-7">
                             <AnimatePresence mode="popLayout">
-                                {displayPlayers.slice(0, 3).map((player, index) => (
-                                    <Card key={player.id} player={player} index={index} isGlobal={false} compactGroup />
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3">
-                            <AnimatePresence mode="popLayout">
-                                {displayPlayers.slice(3, 5).map((player, index) => (
-                                    <Card key={player.id} player={player} index={index + 3} isGlobal={false} compactGroup />
+                                {displayPlayers.map((player, index) => (
+                                    <Card key={`group-row-${index}`} player={player} index={index} isGlobal={false} compactGroup />
                                 ))}
                             </AnimatePresence>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 grid grid-cols-6 grid-rows-5 gap-1.5">
+                <div className="flex-1 min-h-0 grid grid-cols-6 grid-rows-5 gap-2">
                     <AnimatePresence mode="popLayout">
                         {displayPlayers.map((player, index) => (
-                            <Card key={player.id} player={player} index={index} isGlobal />
+                            <Card key={`global-${index}`} player={player} index={index} isGlobal />
                         ))}
                     </AnimatePresence>
                 </div>
@@ -128,12 +133,33 @@ export default function RankList({ gameState }) {
     );
 }
 
+RankList.propTypes = {
+    gameState: PropTypes.shape({
+        players: PropTypes.arrayOf(PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+            name: PropTypes.string.isRequired,
+            avatar: PropTypes.string,
+            score: PropTypes.number,
+            group: PropTypes.number
+        })).isRequired,
+        currentGroup: PropTypes.number,
+        round1Mode: PropTypes.string
+    }).isRequired
+};
+
 // 动态数字滚动组件
 function ScoreCounter({ value }) {
     const [displayValue, setDisplayValue] = useState(value);
+    const displayValueRef = useRef(value);
+    const frameRef = useRef(null);
 
     useEffect(() => {
-        let start = displayValue;
+        if (frameRef.current) {
+            cancelAnimationFrame(frameRef.current);
+        }
+
+        let start = displayValueRef.current;
         const end = value;
         if (start === end) return;
 
@@ -153,17 +179,29 @@ function ScoreCounter({ value }) {
             const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
             const current = start + (end - start) * easeProgress;
 
+            displayValueRef.current = current;
             setDisplayValue(current);
 
             if (progress < 1) {
-                requestAnimationFrame(tick);
+                frameRef.current = requestAnimationFrame(tick);
             } else {
+                displayValueRef.current = end;
                 setDisplayValue(end);
             }
         };
 
-        requestAnimationFrame(tick);
+        frameRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            if (frameRef.current) {
+                cancelAnimationFrame(frameRef.current);
+            }
+        };
     }, [value]);
 
     return <span>{displayValue.toFixed(2)}</span>;
 }
+
+ScoreCounter.propTypes = {
+    value: PropTypes.number.isRequired
+};
