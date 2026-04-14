@@ -44,51 +44,58 @@ export default function Screen() {
     })();
 
     return (
-        <div className="w-screen h-screen flex items-center justify-center overflow-hidden bg-black">
-            <div className="w-full h-full max-w-[calc(100vh*2)] max-h-[calc(100vw/2)] p-[10px]">
-                <div className={`relative w-full h-full overflow-hidden flex flex-col font-sans bg-[var(--color-bg-screen)] text-[var(--color-text-main)] ${themeClass}`}>
-                    {isSpecialMode ? (
-                        <div className="relative w-full h-full overflow-hidden bg-black">
-                            {specialScreenAsset && <img src={specialScreenAsset} alt="投屏画面" className="absolute inset-0 w-full h-full object-cover object-center" />}
-                        </div>
-                    ) : (
-                        <>
-                            {themeClass === 'theme-background' && <div className="absolute inset-0 bg-cover bg-center scale-[1.03]" style={{ backgroundImage: "url('/background.png')" }} />}
-                            {!(
-                                (gameState.screenRound === 1 && (gameState.round1Mode === 'groupIntro' || gameState.round1Mode === 'group'))
-                                || gameState.screenRound === 1.5
-                                || gameState.screenRound === 2
-                                || gameState.screenRound === 3
-                                || gameState.screenRound === 4
-                            ) && (
-                                    <div className="absolute inset-[12px] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]" />
-                                )}
-                            <div className="relative z-20 px-9 pt-6 shrink-0 pointer-events-none">
-                                <div>
-                                    <div className="min-w-0">
-                                        <h1 className="text-[clamp(3rem,4.8vw,5rem)] leading-[0.94] font-black tracking-[0.22em] text-white/60 transition-all duration-500 text-left" style={{ fontFamily: "'FZHENGFSJW', sans-serif", fontWeight: 900 }}>
-                                            「声呼吸」校园歌手大赛
-                                        </h1>
-                                        <p className={`text-[clamp(0.9rem,1.24vw,1.02rem)] mt-3 font-bold text-white/60 tracking-[0.18em] uppercase border-l-4 border-white/30 pl-4 max-w-[70%] ${gameState.screenRound === 1.5 ? 'opacity-0 h-0 mt-0 overflow-hidden' : ''}`}>
-                                            {screenSubtitle}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+        <div className={`w-screen h-screen flex items-center justify-center overflow-hidden relative font-sans text-[var(--color-text-main)] ${themeClass}`}>
+            {/* 全屏背景层，铺满整个 1920×1080 */}
+            {!isSpecialMode && themeClass === 'theme-background' && (
+                <div className="absolute inset-0 bg-cover bg-center scale-[1.03]" style={{ backgroundImage: "url('/background.png')" }} />
+            )}
+            {!isSpecialMode && themeClass !== 'theme-background' && (
+                <div className="absolute inset-0 bg-[var(--color-bg-screen)]" />
+            )}
 
-                            <div className="relative z-10 flex-1 min-h-0 overflow-hidden px-7 pb-6 pt-4 flex flex-col items-center justify-start">
-                                {gameState.screenRound === 0 && <div className="text-center mt-16 text-[var(--color-text-muted)]"><div className="text-[7rem] mb-5 opacity-40 animate-pulse">🎤</div><div className="text-[clamp(2rem,3vw,3rem)] font-black tracking-[0.2em] uppercase">比赛即将开始，敬请期待</div></div>}
-                                {gameState.screenRound === 1 && gameState.round1Mode === 'groupIntro' && <GroupIntro gameState={gameState} />}
-                                {gameState.screenRound === 1 && gameState.round1Mode !== 'groupIntro' && <RankList gameState={gameState} />}
-                                {gameState.screenRound === 1.5 && <PickOpponent gameState={gameState} />}
-                                {gameState.screenRound === 2 && <PkBattle gameState={gameState} />}
-                                {gameState.screenRound === 3 && <DemonKing gameState={gameState} />}
-                                {gameState.screenRound === 4 && <Resurrection gameState={gameState} />}
-                            </div>
-                        </>
-                    )}
+            {/* 特殊模式：全屏素材铺满 1920×1080 */}
+            {isSpecialMode && (
+                <div className="absolute inset-0 bg-black">
+                    {specialScreenAsset && <img src={specialScreenAsset} alt="投屏画面" className="absolute inset-0 w-full h-full object-cover object-center" />}
                 </div>
-            </div>
+            )}
+
+            {/* 2:1 内容区，垂直居中，透明背景 */}
+            {!isSpecialMode && (
+                <div className="relative w-full h-full max-w-[calc(100vh*2)] max-h-[calc(100vw/2)] flex flex-col overflow-hidden">
+                    {!(
+                        (gameState.screenRound === 1 && (gameState.round1Mode === 'groupIntro' || gameState.round1Mode === 'group'))
+                        || gameState.screenRound === 1.5
+                        || gameState.screenRound === 2
+                        || gameState.screenRound === 3
+                        || gameState.screenRound === 4
+                    ) && (
+                        <div className="absolute inset-[12px] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]" />
+                    )}
+                    <div className="relative z-20 px-9 pt-6 shrink-0 pointer-events-none">
+                        <div>
+                            <div className="min-w-0">
+                                <h1 className="text-[clamp(3rem,4.8vw,5rem)] leading-[0.94] font-black tracking-[0.22em] text-white/60 transition-all duration-500 text-left" style={{ fontFamily: "'FZHENGFSJW', sans-serif", fontWeight: 900 }}>
+                                    「声呼吸」校园歌手大赛
+                                </h1>
+                                <p className={`text-[clamp(0.9rem,1.24vw,1.02rem)] mt-3 font-bold text-white/60 tracking-[0.18em] uppercase border-l-4 border-white/30 pl-4 max-w-[70%] ${gameState.screenRound === 1.5 ? 'opacity-0 h-0 mt-0 overflow-hidden' : ''}`}>
+                                    {screenSubtitle}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative z-10 flex-1 min-h-0 overflow-hidden px-7 pb-6 pt-4 flex flex-col items-center justify-start">
+                        {gameState.screenRound === 0 && <div className="text-center mt-16 text-[var(--color-text-muted)]"><div className="text-[7rem] mb-5 opacity-40 animate-pulse">🎤</div><div className="text-[clamp(2rem,3vw,3rem)] font-black tracking-[0.2em] uppercase">比赛即将开始，敬请期待</div></div>}
+                        {gameState.screenRound === 1 && gameState.round1Mode === 'groupIntro' && <GroupIntro gameState={gameState} />}
+                        {gameState.screenRound === 1 && gameState.round1Mode !== 'groupIntro' && <RankList gameState={gameState} />}
+                        {gameState.screenRound === 1.5 && <PickOpponent gameState={gameState} />}
+                        {gameState.screenRound === 2 && <PkBattle gameState={gameState} />}
+                        {gameState.screenRound === 3 && <DemonKing gameState={gameState} />}
+                        {gameState.screenRound === 4 && <Resurrection gameState={gameState} />}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
