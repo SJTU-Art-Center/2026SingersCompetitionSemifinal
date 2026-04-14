@@ -47,7 +47,7 @@ export default function Screen() {
         <div className={`w-screen h-screen flex items-center justify-center overflow-hidden relative font-sans text-[var(--color-text-main)] ${themeClass}`}>
             {/* 全屏背景层，铺满整个 1920×1080 */}
             {!isSpecialMode && themeClass === 'theme-background' && (
-                <div className="absolute inset-0 bg-cover bg-center scale-[1.03]" style={{ backgroundImage: "url('/background.png')" }} />
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/background.png')" }} />
             )}
             {!isSpecialMode && themeClass !== 'theme-background' && (
                 <div className="absolute inset-0 bg-[var(--color-bg-screen)]" />

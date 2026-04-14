@@ -247,16 +247,12 @@ export default function Resurrection({ gameState }) {
     const advancedMasters = useMemo(() => {
         return players
             .filter(p => p.status === 'advanced' && !demonKingIds.has(p.id))
-            .sort((a, b) => {
-                if ((b.round2Score ?? 0) !== (a.round2Score ?? 0)) return (b.round2Score ?? 0) - (a.round2Score ?? 0);
-                if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
-                return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
-            });
+            .sort(comparePlayersByContestantNumber);
     }, [players, demonKingIds]);
 
     // 待定区（按编号顺序展示）
     const pendingPlayers = useMemo(() => {
-        return players.filter(p => p.status === 'pending').sort((a, b) => a.id - b.id);
+        return players.filter(p => p.status === 'pending').sort(comparePlayersByContestantNumber);
     }, [players]);
 
     // 十强剩余名额：10 - 晋级大魔王数 - 晋级擂主数
@@ -275,6 +271,11 @@ export default function Resurrection({ gameState }) {
 
     const advancedFromPending = useMemo(() => pendingSorted.slice(0, remainingSpots), [pendingSorted, remainingSpots]);
     const eliminatedFromPending = useMemo(() => pendingSorted.slice(remainingSpots), [pendingSorted, remainingSpots]);
+
+    // Stage 4 展示用：各组按序号升序
+    const pendingByNumber = useMemo(() => [...pendingPlayers].sort(comparePlayersByContestantNumber), [pendingPlayers]);
+    const advancedFromPendingByNumber = useMemo(() => [...advancedFromPending].sort(comparePlayersByContestantNumber), [advancedFromPending]);
+    const eliminatedFromPendingByNumber = useMemo(() => [...eliminatedFromPending].sort(comparePlayersByContestantNumber), [eliminatedFromPending]);
 
     // 第二轮被淘汰的选手：PK失败的挑战者 + 待定区淘汰
     const round2Eliminated = useMemo(() => {
@@ -333,7 +334,7 @@ export default function Resurrection({ gameState }) {
                             className="flex items-center justify-center gap-[200px]"
                         >
                             {demonKingsAdvanced.length > 0 ? (
-                                demonKingsAdvanced.map((p) => (
+                                [...demonKingsAdvanced].sort(comparePlayersByContestantNumber).map((p) => (
                                     <PlayerCard
                                         key={p.id}
                                         player={p}
@@ -458,32 +459,32 @@ export default function Resurrection({ gameState }) {
                                 className="w-full flex flex-col items-center gap-8 -mt-6"
                             >
                                 {s4Phase === 0 ? (
-                                    /* 揭分阶段：全员混排 */
+                                    /* 揭分阶段：按序号升序展示 */
                                     <div className="flex flex-col items-center gap-6 w-full">
-                                        {pendingPlayers.length <= 8 ? (
+                                        {pendingByNumber.length <= 8 ? (
                                             <div className="flex flex-wrap items-center justify-center gap-8">
-                                                {pendingPlayers.map((p) => (
+                                                {pendingByNumber.map((p) => (
                                                     <motion.div key={p.id} layoutId={`s4c-${p.id}`} layout
                                                         transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.85 }}>
-                                                        <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingPlayers.length > 16} />
+                                                        <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingByNumber.length > 16} />
                                                     </motion.div>
                                                 ))}
                                             </div>
                                         ) : (
                                             <>
                                                 <div className="flex flex-wrap items-center justify-center gap-8">
-                                                    {pendingPlayers.slice(0, Math.ceil(pendingPlayers.length / 2)).map((p) => (
+                                                    {pendingByNumber.slice(0, Math.ceil(pendingByNumber.length / 2)).map((p) => (
                                                         <motion.div key={p.id} layoutId={`s4c-${p.id}`} layout
                                                             transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.85 }}>
-                                                            <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingPlayers.length > 16} />
+                                                            <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingByNumber.length > 16} />
                                                         </motion.div>
                                                     ))}
                                                 </div>
                                                 <div className="flex flex-wrap items-center justify-center gap-8">
-                                                    {pendingPlayers.slice(Math.ceil(pendingPlayers.length / 2)).map((p) => (
+                                                    {pendingByNumber.slice(Math.ceil(pendingByNumber.length / 2)).map((p) => (
                                                         <motion.div key={p.id} layoutId={`s4c-${p.id}`} layout
                                                             transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.85 }}>
-                                                            <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingPlayers.length > 16} />
+                                                            <PlayerCard player={p} showScore={showPendingScore} scoreRollActive={scoreRollActive} small={pendingByNumber.length > 16} />
                                                         </motion.div>
                                                     ))}
                                                 </div>
@@ -496,7 +497,7 @@ export default function Resurrection({ gameState }) {
                                         <div className="flex flex-col items-center gap-4 w-full">
                                             <motion.div animate={{ opacity: s4Phase >= 2 ? 1 : 0 }} transition={{ duration: 0.8 }} className="text-xl font-bold text-teal-300 tracking-widest bg-teal-900/40 px-6 py-1 rounded-full border border-teal-500/40">待定区晋级选手</motion.div>
                                             <div className="flex flex-wrap items-center justify-center gap-8">
-                                                {advancedFromPending.map((p) => (
+                                                {advancedFromPendingByNumber.map((p) => (
                                                     <motion.div key={p.id} layoutId={`s4c-${p.id}`} layout
                                                         transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.85 }}>
                                                         <PlayerCard player={p} showScore={true} scoreRollActive={false} isAdvancedNode={s4Phase >= 2} small={advancedFromPending.length === 9} xsmall={advancedFromPending.length > 9} />
@@ -507,7 +508,7 @@ export default function Resurrection({ gameState }) {
                                         <div className="flex flex-col items-center gap-4 w-full">
                                             <motion.div animate={{ opacity: s4Phase >= 2 ? 1 : 0 }} transition={{ duration: 0.8 }} className="text-xl font-bold text-slate-400 tracking-widest bg-slate-800/50 px-6 py-1 rounded-full border border-slate-600/50">待定区淘汰选手</motion.div>
                                             <div className="flex flex-wrap items-center justify-center gap-8">
-                                                {eliminatedFromPending.map((p) => (
+                                                {eliminatedFromPendingByNumber.map((p) => (
                                                     <motion.div key={p.id} layoutId={`s4c-${p.id}`} layout
                                                         transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.85 }}>
                                                         <PlayerCard player={p} showScore={true} scoreRollActive={false} isEliminatedNode={s4Phase >= 2} small={eliminatedFromPending.length >= 9 || advancedFromPending.length > 9} />
