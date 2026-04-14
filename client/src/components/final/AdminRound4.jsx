@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { formatPlayerNumber } from '../../utils/playerIdentity';
 
 export default function AdminRound4({ gameState, updateState }) {
     const players = Array.isArray(gameState?.players) ? gameState.players : [];
@@ -151,6 +152,7 @@ export default function AdminRound4({ gameState, updateState }) {
                                 index < 18 ? 'bg-blue-900/20 border-blue-500/30' : 'bg-slate-800/80 border-slate-700/50 opacity-60'
                             }`}>
                                 <span className="text-slate-500 font-mono w-4 shrink-0 px-0.5">{(index+1)}</span>
+                                <span className="text-slate-400 font-mono shrink-0">{formatPlayerNumber(p)}</span>
                                 <span className="text-white font-bold truncate flex-1">{p.name}</span>
                                 <span className="text-slate-300 font-mono">{(p.score ?? 0).toFixed(2)}</span>
                             </div>
@@ -173,6 +175,7 @@ export default function AdminRound4({ gameState, updateState }) {
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2 overflow-hidden">
                                         <span className={`font-mono w-4 shrink-0 ${p.isTop10 ? 'text-amber-500' : 'text-slate-500'}`}>{(index+1)}</span>
+                                        <span className="text-slate-400 font-mono shrink-0">{formatPlayerNumber(p)}</span>
                                         <span className={`font-bold text-[13px] truncate ${p.isTop10 ? 'text-amber-200' : 'text-white'}`}>
                                             {p.isTop10 && <span className="mr-1">🏆</span>}
                                             {p.name}
@@ -191,6 +194,8 @@ export default function AdminRound4({ gameState, updateState }) {
                                 <div className="flex justify-between items-center">
                                     <span className="text-slate-400 truncate flex-1">{p.opponentName}</span>
                                     <span className={`font-bold tracking-widest shrink-0 ml-2 ${
+                                        p.roleName === '大魔王' && p.outcomeLabel.includes('晋级') ? 'text-purple-400' :
+                                        p.roleName === '大魔王' ? 'text-blue-400' :
                                         p.outcomeLabel.includes('晋级') ? 'text-emerald-400' :
                                         p.outcomeLabel.includes('淘汰') ? 'text-red-400' : 'text-amber-400'
                                     }`}>{p.outcomeLabel}</span>
