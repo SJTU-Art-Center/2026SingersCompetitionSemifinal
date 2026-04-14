@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { formatPlayerNumber } from '../../utils/playerIdentity';
+import { parseDisplayName, getNameScale } from '../../utils/playerName';
 import PlayerIdentity from '../common/PlayerIdentity';
 
 const GROUP_CARD_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
@@ -53,12 +54,20 @@ export default function RankList({ gameState }) {
                             <div className="text-[12px] font-black tracking-[0.2em] text-white/58 uppercase text-center">
                                 No.{formatPlayerNumber(player)}
                             </div>
-                            <div className="text-[21px] font-black text-white leading-snug break-words text-center max-w-full">
-                                {player.name}
+                            <div className="font-black text-white leading-snug text-center max-w-full">
+                                {(() => {
+                                    const baseFontSize = 21;
+                                    const lines = parseDisplayName(player.name);
+                                    return lines.map((line, i) => {
+                                        const scale = getNameScale(line, 5);
+                                        const fontSize = scale < 1 ? Math.round(baseFontSize * scale) : baseFontSize;
+                                        return <div key={i} style={{ fontSize: `${fontSize}px` }} className="text-center">{line}</div>;
+                                    });
+                                })()}
                             </div>
                         </div>
                         <div className="text-[38px] font-black font-mono text-teal-100 leading-none shrink-0 text-center">
-                            <ScoreCounter value={player.score} />
+                            {player.score > 0 && <ScoreCounter value={player.score} />}
                         </div>
                     </>
                 ) : (
@@ -77,7 +86,7 @@ export default function RankList({ gameState }) {
                             </div>
                         )}
                         <div className={`${large ? 'text-[34px]' : 'text-[18px]'} font-black font-mono text-teal-100 leading-none`}>
-                            <ScoreCounter value={player.score} />
+                            {player.score > 0 && <ScoreCounter value={player.score} />}
                         </div>
                     </>
                 )}
@@ -151,8 +160,8 @@ RankList.propTypes = {
 
 // 动态数字滚动组件
 function ScoreCounter({ value }) {
-    const [displayValue, setDisplayValue] = useState(value);
-    const displayValueRef = useRef(value);
+    const [displayValue, setDisplayValue] = useState(0);
+    const displayValueRef = useRef(0);
     const frameRef = useRef(null);
 
     useEffect(() => {

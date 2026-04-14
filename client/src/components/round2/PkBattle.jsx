@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { formatPlayerNumber, getPlayerName } from '../../utils/playerIdentity';
+import { parseDisplayName } from '../../utils/playerName';
 
 const SCORE_REVEAL_DURATION = 1200;
 const RESULT_REVEAL_DELAY = SCORE_REVEAL_DURATION + 180;
@@ -130,7 +131,7 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
     return (
         <motion.div
             animate={getCardVariant({ showOutcome, winner, role })}
-            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(324px,41.4vh,414px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
+            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(394px,48vh,600px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
         >
             <div className="text-[clamp(0.95rem,1.25vw,1.15rem)] font-black tracking-[0.28em] uppercase text-white/68 text-center">
                 {roleLabel}
@@ -148,8 +149,21 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
                 <div className="text-[clamp(0.86rem,1vw,1rem)] font-black tracking-[0.22em] text-white/54 uppercase">
                     No.{formatPlayerNumber(player)}
                 </div>
-                <div className="mt-2 text-[clamp(1.4rem,2vw,1.9rem)] font-black text-white leading-tight break-words">
-                    {getPlayerName(player, role === 'master' ? '未知擂主' : '未知选手')}
+                <div className="mt-2 text-center">
+                    {(() => {
+                        const lines = parseDisplayName(getPlayerName(player, role === 'master' ? '未知擂主' : '未知选手'));
+                        return lines.map((line, i) => (
+                            <div
+                                key={i}
+                                className={i === 0
+                                    ? 'text-[clamp(1.4rem,2vw,1.9rem)] font-black text-white leading-tight'
+                                    : 'text-[clamp(0.85rem,1.1vw,1.1rem)] font-black text-white/80 leading-tight mt-0.5 tracking-wide'
+                                }
+                            >
+                                {line}
+                            </div>
+                        ));
+                    })()}
                 </div>
             </div>
 
@@ -211,9 +225,9 @@ export default function PkBattle({ gameState }) {
 
     return (
         <div className="flex flex-col items-center justify-start w-full h-full pt-[clamp(6px,0.9vh,12px)] pb-[clamp(8px,1.2vh,16px)] overflow-hidden">
-<h2 className="text-[clamp(1.8rem,3vw,2.3rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(8px,1.2vh,14px)] text-white tracking-[0.22em] italic" style={{ fontFamily: "'HARMONYOS_SANS_SC', sans-serif", fontWeight: 500 }}>
-                                        1V1 BATTLE
-                                    </h2>
+            <h2 className="text-[clamp(1.8rem,3vw,2.3rem)] font-black mt-[clamp(0px,0.3vh,6px)] mb-[clamp(8px,1.2vh,14px)] text-white tracking-[0.22em] italic" style={{ fontFamily: "'FZHENGFSJW', sans-serif", fontWeight: 900 }}>
+                1V1 BATTLE
+            </h2>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

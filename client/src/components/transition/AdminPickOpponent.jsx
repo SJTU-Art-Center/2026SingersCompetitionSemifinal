@@ -6,9 +6,10 @@ import { getPlayerSingleLine } from '../../utils/playerIdentity';
 export default function AdminPickOpponent({ gameState, updateState }) {
     const stageDefs = [
         { value: 1, label: 'Stage 1 · 30人卡牌排名' },
-        { value: 2, label: 'Stage 2 · 19-30名淘汰动画' },
-        { value: 3, label: 'Stage 3 · 大魔王金色降临' },
-        { value: 4, label: 'Stage 4 · 擂主固定+攻擂入槽' }
+        { value: 2, label: 'Stage 2 · 12名淡汰展示' },
+        { value: 3, label: 'Stage 3 · 18名晋级展示' },
+        { value: 4, label: 'Stage 4 · 大魔王金色降临' },
+        { value: 5, label: 'Stage 5 · 擂主固定+攻擂入槽' }
     ];
 
     const pkMatches = gameState.pkMatches || [];
@@ -20,8 +21,8 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         return a.id - b.id;
     });
     
-    const masters = [...sortedPlayers.slice(2, 9), sortedPlayers[10]].filter(Boolean);
-    const challengers = [...sortedPlayers.slice(11, 18), sortedPlayers[9]].filter(Boolean);
+    const masters = sortedPlayers.slice(2, 10).sort((a, b) => a.score - b.score);
+    const challengers = sortedPlayers.slice(10, 18).sort((a, b) => a.score - b.score);
 
     const [selChallenger, setSelChallenger] = useState("");
     const [selMaster, setSelMaster] = useState("");
@@ -39,8 +40,8 @@ export default function AdminPickOpponent({ gameState, updateState }) {
             pkMatches: newMatches,
             pickingChallengerId: null,
             screenRound: 1.5,
-            screenTransitionStage: 4,
-            transitionStage: Math.max(4, Number(gameState.transitionStage ?? 1)),
+            screenTransitionStage: 5,
+            transitionStage: Math.max(5, Number(gameState.transitionStage ?? 1)),
             screenDisplayMode: 'live'
         });
         setSelChallenger("");
@@ -152,10 +153,10 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                         📺 投屏当前编辑Stage
                     </button>
                     <button
-                        onClick={() => handleProjectStage(Math.min(4, editStage + 1))}
+                        onClick={() => handleProjectStage(Math.min(5, editStage + 1))}
                         className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200"
                     >
-                        投屏下一步 ▶
+                        投屏下一步 ►
                     </button>
                 </div>
             </div>
@@ -333,8 +334,8 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                 );
             })()}
 
-            {/* ── Stage 2-4：配对控制 ── */}
-            {editStage !== 1 && (
+            {/* ── Stage 2-5：配对控制 ── */}
+            {editStage > 1 && (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     {/* 结对操作 */}
                     <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">

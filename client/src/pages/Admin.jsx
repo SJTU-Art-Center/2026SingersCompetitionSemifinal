@@ -48,6 +48,7 @@ export default function Admin() {
         live: '直播投屏',
         background: '背景模式',
         kv: 'KV 模式',
+        wiz: '背景LOGO',
         black: '黑屏模式'
     };
 
@@ -138,6 +139,12 @@ export default function Admin() {
                                 背景
                             </button>
                             <button
+                                onClick={() => setScreenDisplayMode('wiz')}
+                                className={`font-bold px-3.5 py-1.5 rounded-xl shadow-lg text-sm border transition-colors ${screenDisplayMode === 'wiz' ? 'bg-amber-500/85 text-white border-amber-300' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-600'}`}
+                            >
+                                背景LOGO
+                            </button>
+                            <button
                                 onClick={() => setScreenDisplayMode('kv')}
                                 className={`font-bold px-3.5 py-1.5 rounded-xl shadow-lg text-sm border transition-colors ${screenDisplayMode === 'kv' ? 'bg-fuchsia-500/85 text-white border-fuchsia-300' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-600'}`}
                             >
@@ -205,7 +212,7 @@ export default function Admin() {
                         <span className="text-xs text-teal-400 font-bold">✏️ 编辑: {phases[adminIdx]?.label}</span>
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-amber-400 font-bold">📺 大屏: {screenPinLabel}</span>
-                            <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${screenDisplayMode === 'live' ? 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10' : screenDisplayMode === 'background' ? 'text-sky-200 border-sky-400/40 bg-sky-500/10' : screenDisplayMode === 'kv' ? 'text-fuchsia-200 border-fuchsia-400/40 bg-fuchsia-500/10' : 'text-slate-100 border-slate-400/40 bg-slate-700/40'}`}>
+                            <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${screenDisplayMode === 'live' ? 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10' : screenDisplayMode === 'background' ? 'text-sky-200 border-sky-400/40 bg-sky-500/10' : screenDisplayMode === 'kv' ? 'text-fuchsia-200 border-fuchsia-400/40 bg-fuchsia-500/10' : screenDisplayMode === 'wiz' ? 'text-amber-200 border-amber-400/40 bg-amber-500/10' : 'text-slate-100 border-slate-400/40 bg-slate-700/40'}`}>
                                 {displayModeLabelMap[screenDisplayMode]}
                             </span>
                         </div>

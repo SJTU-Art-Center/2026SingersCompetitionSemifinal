@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { getFullAvatarUrl } from '../../utils/avatar';
 import { formatPlayerNumber } from '../../utils/playerIdentity';
+import { parseDisplayName, getNameScale } from '../../utils/playerName';
 const PANEL_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
 const CARD_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]';
 
@@ -24,7 +25,17 @@ export default function GroupIntro({ gameState }) {
             </div>
             <div className="mt-2 min-w-0 w-full">
                 <div className="text-[10px] font-black tracking-[0.26em] uppercase text-white/58">No.{formatPlayerNumber(player)}</div>
-                <div className="mt-0.5 text-[12px] font-black tracking-[0.03em] text-white leading-tight break-words">{player.name}</div>
+                <div className="mt-0.5 font-black tracking-[0.03em] text-white leading-tight text-center">
+                    {(() => {
+                        const baseFontSize = 12;
+                        const lines = parseDisplayName(player.name);
+                        return lines.map((line, i) => {
+                            const scale = getNameScale(line, 7);
+                            const fontSize = scale < 1 ? Math.round(baseFontSize * scale) : baseFontSize;
+                            return <div key={i} style={{ fontSize: `${fontSize}px` }} className="text-center">{line}</div>;
+                        });
+                    })()}
+                </div>
             </div>
         </div>
     );

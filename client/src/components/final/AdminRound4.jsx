@@ -13,7 +13,8 @@ export default function AdminRound4({ gameState, updateState }) {
         { id: 2, label: '晋级擂主', icon: '🥇' },
         { id: 3, label: '待定区展示', icon: '👥' },
         { id: 4, label: '晋级分流', icon: '⚖️' },
-        { id: 5, label: '十强诞生', icon: '🏆' },
+        { id: 5, label: '第二轮淘汰选手', icon: '💔' },
+        { id: 6, label: '十强诞生', icon: '🏆' },
     ];
 
     const top10Ids = useMemo(() => {
@@ -122,6 +123,17 @@ export default function AdminRound4({ gameState, updateState }) {
                         );
                     })}
                 </div>
+
+                {finalStageIndex === 6 && (
+                    <div className="mt-4 flex justify-center">
+                        <button
+                            onClick={() => updateState({ ...gameState, confettiTrigger: Date.now() })}
+                            className="px-8 py-3 rounded-xl font-bold text-lg transition-all bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-400 hover:to-pink-400 text-white border border-amber-300/50 shadow-[0_0_20px_rgba(251,191,36,0.3)] active:scale-95"
+                        >
+                            🎆 播放礼花特效
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* 完整分数展示大盘 */}

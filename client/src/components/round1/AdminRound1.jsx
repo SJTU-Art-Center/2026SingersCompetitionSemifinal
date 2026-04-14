@@ -12,8 +12,8 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
     const handleSelect = (id) => {
         setSelectedPlayerId(id);
         const p = gameState.players.find(p => p.id === id);
-        setJudgeScoreInput(p && p.judgeScore !== undefined ? p.judgeScore : "");
-        setPublicScoreInput(p && p.publicScore !== undefined ? p.publicScore : "");
+        setJudgeScoreInput(p && p.judgeScore != null ? p.judgeScore : "");
+        setPublicScoreInput(p && p.publicScore != null ? p.publicScore : "");
     };
 
     const handleSubmitScore = () => {
@@ -62,6 +62,15 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
         updateState({ ...gameState, players: newPlayers });
     };
 
+    const handleClearScores = () => {
+        if (!window.confirm('⚠️ 确认清除第一轮所有选手的分数？\n此操作不可撤销。')) return;
+        const newPlayers = gameState.players.map(p => ({
+            ...p, score: 0, judgeScore: null, publicScore: null
+        }));
+        updateState({ ...gameState, players: newPlayers });
+        setHistory([]);
+    };
+
     const selectedPlayer = gameState.players.find(p => p.id === selectedPlayerId);
 
     return (
@@ -72,6 +81,12 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
                     第一轮管理：30进18成绩录入
                 </h2>
                 <div className="flex gap-2">
+                    <button
+                        onClick={handleClearScores}
+                        className="px-4 py-2 rounded font-bold transition-all bg-orange-600/80 hover:bg-orange-500 text-white border border-orange-400/50 text-sm"
+                    >
+                        🗑️ 清除第一轮分数
+                    </button>
                     <button
                         onClick={handleSeedData}
                         className="px-4 py-2 rounded font-bold transition-all bg-violet-600/80 hover:bg-violet-500 text-white border border-violet-400/50 text-sm"
