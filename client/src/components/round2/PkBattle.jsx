@@ -131,7 +131,7 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
     return (
         <motion.div
             animate={getCardVariant({ showOutcome, winner, role })}
-            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(394px,48vh,600px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden text-[var(--color-text-main)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
+            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(394px,48vh,600px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center justify-center overflow-hidden text-[var(--color-text-main)] transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
         >
             <div className="text-[clamp(0.95rem,1.25vw,1.15rem)] font-black tracking-[0.28em] uppercase text-white/68 text-center">
                 {roleLabel}
@@ -167,22 +167,16 @@ function BattleCard({ player, roleLabel, role, scoreValue, showScoreRoll, showOu
                 </div>
             </div>
 
-            <div className="mt-[clamp(18px,2vh,28px)] min-h-[clamp(72px,8vh,96px)] flex items-center justify-center w-full text-center">
-                {showScoreRoll ? (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.88, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="text-[clamp(2.3rem,4vw,3.8rem)] leading-none font-mono font-black text-white"
-                    >
-                        <RollingScore value={scoreValue} active={showScoreRoll} runKey={`${role}-${scoreValue}`} />
-                    </motion.div>
-                ) : (
-                    <div className="w-full flex items-center justify-center text-[clamp(2rem,3.4vw,3.4rem)] leading-none font-black font-mono tracking-[0.22em] text-white/42 whitespace-nowrap">
-                        ???
-                    </div>
-                )}
-            </div>
+            {showScoreRoll && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.88, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.24, ease: 'easeOut' }}
+                    className="mt-[clamp(18px,2vh,28px)] text-[clamp(2.3rem,4vw,3.8rem)] leading-none font-mono font-black text-white"
+                >
+                    <RollingScore value={scoreValue} active={showScoreRoll} runKey={`${role}-${scoreValue}`} />
+                </motion.div>
+            )}
 
         </motion.div>
     );

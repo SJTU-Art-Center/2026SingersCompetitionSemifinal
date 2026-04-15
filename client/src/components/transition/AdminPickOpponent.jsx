@@ -20,7 +20,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         if ((b.judgeScore ?? 0) !== (a.judgeScore ?? 0)) return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
         return a.id - b.id;
     });
-    
+
     const masters = sortedPlayers.slice(2, 10).sort((a, b) => a.score - b.score);
     const challengers = sortedPlayers.slice(10, 18).sort((a, b) => a.score - b.score);
 
@@ -61,7 +61,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
 
     const handleSeedData = () => {
         if (!window.confirm('⚠️ 一键填入测试配对？\n将自动把挑战者和守播区选手一一配对，覆盖现有配对列表。')) return;
-        const newMatches = challengers.map((c, i) => ({
+        const newMatches = challeners.map((c, i) => ({
             challengerId: c.id,
             masterId: masters[i].id,
             challengerScore: 0,
@@ -83,6 +83,11 @@ export default function AdminPickOpponent({ gameState, updateState }) {
         if ((b.judgeScore ?? 0) !== (a.judgeScore ?? 0)) return (b.judgeScore ?? 0) - (a.judgeScore ?? 0);
         return a.id - b.id;
     });
+    // Stage 1 展示用：晋级18人按分数排序，淘汰12人按序号排序
+    const displayForRank = [
+        ...sortedForRank.slice(0, 18),
+        ...sortedForRank.slice(18).sort((a, b) => (a.number ?? a.id) - (b.number ?? b.id))
+    ];
     const getRank1Score = (p) => p.score;
 
     // 判断每个选手的同分类型：'scoreAndJudge' | 'scoreOnly' | null
@@ -197,25 +202,26 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                 });
                                 return (
                                     <div className="grid grid-cols-6 gap-2">
-                                        {sortedForRank.map((player, index) => {
+                                        {displayForRank.map((player) => {
+                                            const rankIndex = sortedForRank.findIndex(p => p.id === player.id);
                                             const tieType = playerTieMap.get(player.id) ?? null;
                                             const r1Score = getRank1Score(player);
                                             const hasScore = r1Score > 0;
                                             // 卡片边框色
                                             const cardBorder =
                                                 tieType === 'scoreAndJudge' ? 'border-amber-500/60 bg-amber-500/8'
-                                                : tieType === 'scoreOnly' ? 'border-yellow-400/45 bg-yellow-400/6'
-                                                : index < 2 ? 'border-amber-400/40 bg-amber-400/5'
-                                                : index < 10 ? 'border-teal-500/30 bg-teal-500/5'
-                                                : index < 18 ? 'border-sky-500/25 bg-sky-500/4'
-                                                : 'border-slate-700/50 bg-slate-800/40 opacity-55';
-                                            const rankColor = index < 2 ? 'text-amber-300' : index < 18 ? 'text-slate-400' : 'text-slate-600';
+                                                    : tieType === 'scoreOnly' ? 'border-yellow-400/45 bg-yellow-400/6'
+                                                        : rankIndex < 2 ? 'border-amber-400/40 bg-amber-400/5'
+                                                            : rankIndex < 10 ? 'border-teal-500/30 bg-teal-500/5'
+                                                                : rankIndex < 18 ? 'border-sky-500/25 bg-sky-500/4'
+                                                                    : 'border-slate-700/50 bg-slate-800/40 opacity-55';
+                                            const rankColor = rankIndex < 2 ? 'text-amber-300' : rankIndex < 18 ? 'text-slate-400' : 'text-slate-600';
                                             return (
                                                 <div
                                                     key={player.id}
                                                     className={`rounded-lg border p-2 flex flex-col items-center gap-1 text-center transition-colors ${cardBorder}`}
                                                 >
-                                                    <div className={`text-[10px] font-black tabular-nums ${rankColor}`}>#{index + 1}</div>
+                                                    <div className={`text-[10px] font-black tabular-nums ${rankColor}`}>#{rankIndex + 1}</div>
                                                     <img
                                                         src={getFullAvatarUrl(player.avatar)}
                                                         alt=""
@@ -258,7 +264,7 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                             {!hasTies && (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-2 py-12">
                                     <div className="text-2xl">✅</div>
-                                    <div className="text-xs text-slate-500">无同分情况<br/>排名已确定</div>
+                                    <div className="text-xs text-slate-500">无同分情况<br />排名已确定</div>
                                 </div>
                             )}
 
@@ -267,51 +273,45 @@ export default function AdminPickOpponent({ gameState, updateState }) {
                                 return (
                                     <div
                                         key={`tie-group-${gi}`}
-                                        className={`rounded-lg border p-3 flex flex-col gap-2 flex-shrink-0 ${
-                                            isJudgeTie
+                                        className={`rounded-lg border p-3 flex flex-col gap-2 flex-shrink-0 ${isJudgeTie
                                                 ? 'border-amber-500/50 bg-amber-500/8'
                                                 : 'border-yellow-400/40 bg-yellow-400/6'
-                                        }`}
+                                            }`}
                                     >
-                                        <div className={`text-xs font-black flex items-center gap-1.5 ${
-                                            isJudgeTie ? 'text-amber-300' : 'text-yellow-300'
-                                        }`}>
+                                        <div className={`text-xs font-black flex items-center gap-1.5 ${isJudgeTie ? 'text-amber-300' : 'text-yellow-300'
+                                            }`}>
                                             <span>{isJudgeTie ? '⚠️' : '△'}</span>
                                             <span>
                                                 {group.members.length}人并列
                                                 {isJudgeTie ? '（需人工裁定）' : '（评委分已拉开）'}
                                             </span>
                                         </div>
-                                        <div className={`text-[10px] mb-0.5 ${
-                                            isJudgeTie ? 'text-amber-200/55' : 'text-yellow-200/50'
-                                        }`}>
+                                        <div className={`text-[10px] mb-0.5 ${isJudgeTie ? 'text-amber-200/55' : 'text-yellow-200/50'
+                                            }`}>
                                             总分 {Number(group.score).toFixed(2)}
                                             {isJudgeTie ? '，评委分也相同' : '，评委分有差异'}
                                         </div>
                                         {group.members.map(({ player, rankIndex }) => (
                                             <div
                                                 key={player.id}
-                                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${
-                                                    isJudgeTie ? 'bg-amber-500/10' : 'bg-yellow-400/8'
-                                                }`}
+                                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${isJudgeTie ? 'bg-amber-500/10' : 'bg-yellow-400/8'
+                                                    }`}
                                             >
-                                                <div className={`text-[10px] font-black w-5 text-center ${
-                                                    isJudgeTie ? 'text-amber-400' : 'text-yellow-400'
-                                                }`}>#{rankIndex + 1}</div>
+                                                <div className={`text-[10px] font-black w-5 text-center ${isJudgeTie ? 'text-amber-400' : 'text-yellow-400'
+                                                    }`}>#{rankIndex + 1}</div>
                                                 <img
                                                     src={getFullAvatarUrl(player.avatar)}
                                                     alt=""
-                                                    className={`w-6 h-6 rounded-full object-cover flex-shrink-0 border ${
-                                                        isJudgeTie ? 'border-amber-400/30' : 'border-yellow-400/30'
-                                                    }`}
+                                                    className={`w-6 h-6 rounded-full object-cover flex-shrink-0 border ${isJudgeTie ? 'border-amber-400/30' : 'border-yellow-400/30'
+                                                        }`}
                                                 />
                                                 <div className="flex-1 min-w-0">
                                                     <PlayerIdentity
                                                         player={player}
                                                         compact
                                                         center={false}
-                                                        numberClassName={`text-[8px] ${ isJudgeTie ? 'text-amber-500/70' : 'text-yellow-500/70'}`}
-                                                        nameClassName={`text-xs font-bold truncate ${ isJudgeTie ? 'text-amber-200' : 'text-yellow-200'}`}
+                                                        numberClassName={`text-[8px] ${isJudgeTie ? 'text-amber-500/70' : 'text-yellow-500/70'}`}
+                                                        nameClassName={`text-xs font-bold truncate ${isJudgeTie ? 'text-amber-200' : 'text-yellow-200'}`}
                                                     />
                                                 </div>
                                                 <div className="text-right flex-shrink-0">

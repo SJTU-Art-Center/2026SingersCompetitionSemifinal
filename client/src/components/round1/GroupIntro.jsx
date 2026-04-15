@@ -8,7 +8,7 @@ const CARD_CLASS = 'rounded-[24px] border border-white/20 bg-white/10 backdrop-b
 export default function GroupIntro({ gameState }) {
     const groups = [1, 2, 3, 4, 5, 6].map(g => ({
         id: g,
-        players: gameState.players.filter(p => (p.group || 1) === g),
+        players: [...gameState.players.filter(p => (p.group || 1) === g)].reverse(),
     }));
 
     const renderPlayerCard = (player) => (

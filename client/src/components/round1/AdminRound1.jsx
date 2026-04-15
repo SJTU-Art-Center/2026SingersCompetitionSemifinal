@@ -110,7 +110,7 @@ export default function AdminRound1({ gameState, updateState, adminGroup }) {
                 <div className="col-span-2">
                     <h3 className="text-sm mb-2 text-slate-300 font-bold border-l-4 border-slate-500 pl-2">第 {adminGroup || 1} 组 选手</h3>
                     <div className="grid grid-cols-5 gap-2">
-                        {gameState.players.filter(p => (p.group || 1) === (adminGroup || 1)).map(p => (
+                        {[...gameState.players.filter(p => (p.group || 1) === (adminGroup || 1))].reverse().map(p => (
                             <button
                                 key={p.id}
                                 onClick={() => handleSelect(p.id)}

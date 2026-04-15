@@ -1,6 +1,96 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { formatPlayerNumber } from '../../utils/playerIdentity';
+import { formatPlayerNumber, comparePlayersByContestantNumber } from '../../utils/playerIdentity';
+
+function PlayerChip({ player }) {
+    return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-600 text-xs text-white font-bold whitespace-nowrap">
+            <span className="text-slate-400 font-mono">{formatPlayerNumber(player)}</span>
+            {player.name}
+        </span>
+    );
+}
+
+PlayerChip.propTypes = { player: PropTypes.object.isRequired };
+
+function StatusOverviewBlock({ players, round1Sorted, pkMatches, top10Ids }) {
+    const top18 = round1Sorted.slice(0, 18);
+    const challengerIds = new Set(pkMatches.map(m => m.challengerId));
+
+    const pendingList = useMemo(() =>
+        [...players.filter(p => p.status === 'pending')].sort(comparePlayersByContestantNumber),
+        [players]
+    );
+
+    const eliminatedChallengerList = useMemo(() =>
+        [...top18.filter(p => {
+            const r1Rank = round1Sorted.findIndex(s => s.id === p.id) + 1;
+            return r1Rank > 10 && p.status === 'eliminated' && challengerIds.has(p.id);
+        })].sort(comparePlayersByContestantNumber),
+        [top18, round1Sorted, challengerIds]
+    );
+
+    const top10List = useMemo(() =>
+        [...players.filter(p => top10Ids.has(p.id))].sort(comparePlayersByContestantNumber),
+        [players, top10Ids]
+    );
+
+    const sections = [
+        {
+            label: '18人中待定区名单',
+            color: 'text-amber-300',
+            border: 'border-amber-500/40',
+            count: pendingList.length,
+            list: pendingList,
+        },
+        {
+            label: '18人中输的挑战者名单',
+            color: 'text-red-300',
+            border: 'border-red-500/40',
+            count: eliminatedChallengerList.length,
+            list: eliminatedChallengerList,
+        },
+        {
+            label: '十强名单',
+            color: 'text-emerald-300',
+            border: 'border-emerald-500/40',
+            count: top10List.length,
+            list: top10List,
+        },
+    ];
+
+    return (
+        <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+            <h3 className="text-slate-300 font-bold mb-4 flex items-center gap-2 text-sm">
+                <span className="opacity-80">分类名单速览</span>
+            </h3>
+            <div className="flex flex-col gap-4">
+                {sections.map(({ label, color, border, count, list }) => (
+                    <div key={label} className={`border ${border} rounded-lg p-3 bg-slate-800/50`}>
+                        <div className={`text-xs font-bold mb-2 ${color} flex items-center gap-2`}>
+                            <span>{label}</span>
+                            <span className="bg-slate-700 text-slate-300 rounded px-1.5 py-0.5">{count} 人</span>
+                        </div>
+                        {list.length === 0 ? (
+                            <span className="text-slate-500 text-xs">暂无</span>
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                {list.map(p => <PlayerChip key={p.id} player={p} />)}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+StatusOverviewBlock.propTypes = {
+    players: PropTypes.array.isRequired,
+    round1Sorted: PropTypes.array.isRequired,
+    pkMatches: PropTypes.array.isRequired,
+    top10Ids: PropTypes.instanceOf(Set).isRequired,
+};
 
 export default function AdminRound4({ gameState, updateState }) {
     const players = Array.isArray(gameState?.players) ? gameState.players : [];
@@ -204,6 +294,14 @@ export default function AdminRound4({ gameState, updateState }) {
                         ))}
                     </div>
                 </div>
+
+                {/* 模块 3：分类名单速览 */}
+                <StatusOverviewBlock
+                    players={players}
+                    round1Sorted={round1Sorted}
+                    pkMatches={gameState.pkMatches || []}
+                    top10Ids={top10Ids}
+                />
             </div>
         </div>
     );

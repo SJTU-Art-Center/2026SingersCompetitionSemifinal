@@ -243,12 +243,17 @@ export default function Resurrection({ gameState }) {
 
     const demonKingIds = useMemo(() => new Set(demonKings.map(p => p.id)), [demonKings]);
 
-    // 晋级擂主：status='advanced' 且不是大魔王（第二轮PK赢了的擂主）
+    // 从 pkMatches 派生实际参赛的擂主/挑战者 id 集合，防止脏数据污染计算
+    const pkMatchList = Array.isArray(gameState.pkMatches) ? gameState.pkMatches : [];
+    const masterIds = useMemo(() => new Set(pkMatchList.map(m => m.masterId)), [pkMatchList]);
+    const challengerIds = useMemo(() => new Set(pkMatchList.map(m => m.challengerId)), [pkMatchList]);
+
+    // 晋级擂主：status='advanced' 且不是大魔王 且实际参赛过擂主位
     const advancedMasters = useMemo(() => {
         return players
-            .filter(p => p.status === 'advanced' && !demonKingIds.has(p.id))
+            .filter(p => p.status === 'advanced' && !demonKingIds.has(p.id) && masterIds.has(p.id))
             .sort(comparePlayersByContestantNumber);
-    }, [players, demonKingIds]);
+    }, [players, demonKingIds, masterIds]);
 
     // 待定区（按编号顺序展示）
     const pendingPlayers = useMemo(() => {
@@ -277,12 +282,12 @@ export default function Resurrection({ gameState }) {
     const advancedFromPendingByNumber = useMemo(() => [...advancedFromPending].sort(comparePlayersByContestantNumber), [advancedFromPending]);
     const eliminatedFromPendingByNumber = useMemo(() => [...eliminatedFromPending].sort(comparePlayersByContestantNumber), [eliminatedFromPending]);
 
-    // 第二轮被淘汰的选手：PK失败的挑战者 + 待定区淘汰
+    // 第二轮被淘汰的选手：PK失败的挑战者（仅限实际参赛挑战者）+ 待定区淘汰
     const round2Eliminated = useMemo(() => {
         const eliminatedChallengers = players
-            .filter(p => p.status === 'eliminated' && !demonKingIds.has(p.id));
+            .filter(p => p.status === 'eliminated' && !demonKingIds.has(p.id) && challengerIds.has(p.id));
         return [...eliminatedChallengers, ...eliminatedFromPending].sort(comparePlayersByContestantNumber);
-    }, [players, demonKingIds, eliminatedFromPending]);
+    }, [players, demonKingIds, challengerIds, eliminatedFromPending]);
 
     // 完整十强：大魔王晋级 + 晋级擂主 + 待定区晋级
     const fullTop10 = useMemo(() => {

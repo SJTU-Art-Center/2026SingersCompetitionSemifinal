@@ -13,6 +13,7 @@ export default function Admin() {
     const [adminMatchIndex, setAdminMatchIndex] = useState(0);
     const [adminGroup, setAdminGroup] = useState(gameState?.currentGroup || 1);
     const [adminRound1Mode, setAdminRound1Mode] = useState(gameState?.round1Mode || 'group');
+    const [adminRound1ShowScore, setAdminRound1ShowScore] = useState(gameState?.round1ShowScore ?? false);
 
     const finalStageLabels = {
         1: '待定区展示',
@@ -54,7 +55,7 @@ export default function Admin() {
 
     const projectLiveScreen = () => {
         if (gameState.adminRound === 1) {
-            updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode, screenDisplayMode: 'live' });
+            updateState({ ...gameState, screenRound: gameState.adminRound, currentGroup: adminGroup, round1Mode: adminRound1Mode, round1ShowScore: adminRound1ShowScore, screenDisplayMode: 'live' });
         } else if (gameState.adminRound === 1.5) {
             const stage = Number(gameState.transitionStage ?? 1);
             updateState({ ...gameState, screenRound: 1.5, transitionStage: stage, screenTransitionStage: stage, screenDisplayMode: 'live' });
@@ -238,6 +239,21 @@ export default function Admin() {
                                     第 {g} 组
                                 </button>
                             ))}
+                            <div className="ml-auto flex items-center gap-2">
+                                <span className="text-xs text-slate-400 font-bold">投屏分数：</span>
+                                <button
+                                    onClick={() => setAdminRound1ShowScore(false)}
+                                    className={`px-3 py-2 rounded-lg font-bold transition-all text-sm ${!adminRound1ShowScore ? 'bg-slate-500 text-white shadow-[0_0_8px_rgba(100,116,139,0.6)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    🙈 隐藏分数
+                                </button>
+                                <button
+                                    onClick={() => setAdminRound1ShowScore(true)}
+                                    className={`px-3 py-2 rounded-lg font-bold transition-all text-sm ${adminRound1ShowScore ? 'bg-emerald-600 text-white shadow-[0_0_8px_rgba(5,150,105,0.6)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    📊 显示分数
+                                </button>
+                            </div>
                         </div>
                     )}
 

@@ -7,54 +7,81 @@ export default function AdminRound3({ gameState, updateState }) {
     const players = Array.isArray(gameState.players) ? gameState.players : [];
     const sortedPlayers = [...players].sort((a, b) => b.score - a.score || a.id - b.id);
     const demonKings = sortedPlayers.slice(0, 2);
+    const dk1 = demonKings[0] ?? null;
+    const dk2 = demonKings[1] ?? null;
     const referencePlayers = sortedPlayers.slice(2, 18);
-    const referenceAverage = referencePlayers.length > 0
-        ? referencePlayers.reduce((sum, player) => sum + Number(player.score || 0), 0) / referencePlayers.length
+    const referencePlayersWithScore = referencePlayers.filter(p => Number.isFinite(Number(p.round2Score)) && Number(p.round2Score) > 0);
+    const referenceAverage = referencePlayersWithScore.length > 0
+        ? referencePlayersWithScore.reduce((sum, player) => sum + Number(player.round2Score), 0) / referencePlayersWithScore.length
         : 0;
     const averageValue = Number.isFinite(referenceAverage) ? referenceAverage : 0;
     const averageScore = averageValue.toFixed(3);
 
-    const selectedDKId = gameState.selectedDemonKingId ?? null;
-    const [scoreInput, setScoreInput] = useState('');
+    const [score1Input, setScore1Input] = useState('');
+    const [score2Input, setScore2Input] = useState('');
 
     const hasValidScore = (player) => {
         const score = Number(player?.scoreDK);
         return Number.isFinite(score) && score > 0;
     };
 
-    const handleSelect = (id) => {
-        const dk = players.find(p => p.id === id);
-        setScoreInput(hasValidScore(dk) ? String(dk.scoreDK) : '');
-        updateState({ ...gameState, selectedDemonKingId: id, demonKingAvgScore: averageValue });
+    const dk1Submitted = hasValidScore(dk1);
+    const dk2Submitted = hasValidScore(dk2);
+
+    const projectedDK = players.find(p => p.id === gameState.activeDemonKingId);
+
+    const handleProjectDK = (id) => {
+        updateState({
+            ...gameState,
+            screenRound: 3,
+            activeDemonKingId: id,
+            selectedDemonKingId: id,
+            demonKingAvgScore: averageValue,
+            screenDisplayMode: 'live'
+        });
     };
 
-    const handleSubmitScore = () => {
-        if (!selectedDKId) return;
-        const dkScore = parseFloat(scoreInput);
-        if (isNaN(dkScore)) return alert('请输入有效分数');
-        const avg = averageValue;
-        const newStatus = dkScore >= avg ? 'advanced' : 'pending';
-        const newPlayers = players.map(p =>
-            p.id === selectedDKId ? { ...p, scoreDK: dkScore, status: newStatus } : p
+    const handleSubmitBoth = () => {
+        // 收集需要提交的分数
+        const updates = [];
+        if (dk1 && !dk1Submitted && score1Input) {
+            const s = parseFloat(score1Input);
+            if (!isNaN(s)) updates.push({ id: dk1.id, score: s });
+        }
+        if (dk2 && !dk2Submitted && score2Input) {
+            const s = parseFloat(score2Input);
+            if (!isNaN(s)) updates.push({ id: dk2.id, score: s });
+        }
+        if (updates.length === 0) return alert('请至少输入一个有效分数');
+
+        const updateIds = new Set(updates.map(u => u.id));
+        const scoreMap = Object.fromEntries(updates.map(u => [u.id, u.score]));
+        const newPlayers = players.map(p => {
+            if (!updateIds.has(p.id)) return p;
+            const dkScore = scoreMap[p.id];
+            return { ...p, scoreDK: dkScore, status: dkScore >= averageValue ? 'advanced' : 'pending' };
+        });
+        updateState({
+            ...gameState,
+            players: newPlayers,
+            dkScoreSubmitted: newPlayers.some(hasValidScore),
+            demonKingAvgScore: averageValue
+        });
+    };
+
+    const handleResetScore = (dkId) => {
+        if (!dkId) return;
+        if (!window.confirm('确定清空该大魔王的分数吗？')) return;
+        const newPlayers = players.map((p) =>
+            p.id === dkId ? { ...p, scoreDK: undefined, status: 'top2' } : p
         );
         updateState({
             ...gameState,
             players: newPlayers,
             dkScoreSubmitted: newPlayers.some(hasValidScore)
         });
-    };
-
-    const handleResetScore = () => {
-        if (!selectedDKId) return;
-        const newPlayers = players.map((p) => (
-            p.id === selectedDKId ? { ...p, scoreDK: undefined, status: 'top2' } : p
-        ));
-        updateState({
-            ...gameState,
-            players: newPlayers,
-            dkScoreSubmitted: newPlayers.some(hasValidScore)
-        });
-        setScoreInput('');
+        if (dkId === dk1?.id) setScore1Input('');
+        if (dkId === dk2?.id) setScore2Input('');
     };
 
     const handleSeedData = () => {
@@ -75,9 +102,64 @@ export default function AdminRound3({ gameState, updateState }) {
         });
     };
 
-    const selectedDK = players.find(p => p.id === selectedDKId);
-    const projectedDK = players.find(p => p.id === gameState.activeDemonKingId);
-    const selectedSubmitted = hasValidScore(selectedDK);
+    // 单侧 DK 面板
+    const renderDkPanel = (dk, scoreInput, setScoreInput, colorScheme) => {
+        if (!dk) return null;
+        const submitted = hasValidScore(dk);
+        const passed = submitted && dk.scoreDK >= averageValue;
+        const borderColor = colorScheme === 'amber' ? 'border-amber-800/50' : 'border-rose-800/50';
+        const bgColor = colorScheme === 'amber' ? 'bg-amber-900/20' : 'bg-rose-900/20';
+        const accentText = colorScheme === 'amber' ? 'text-amber-500' : 'text-rose-500';
+        const accentName = colorScheme === 'amber' ? 'text-amber-300' : 'text-rose-300';
+        const accentBorder = colorScheme === 'amber' ? 'border-amber-500' : 'border-rose-500';
+        const inputBorderL = colorScheme === 'amber' ? 'border-l-amber-600' : 'border-l-rose-600';
+        const inputText = colorScheme === 'amber' ? 'text-amber-300' : 'text-rose-300';
+
+        return (
+            <div className={`flex-1 flex flex-col items-center ${bgColor} border ${borderColor} rounded-lg py-2 px-1`}>
+                <img src={getFullAvatarUrl(dk.avatar)} alt="" className={`w-10 h-10 rounded-full border-2 ${accentBorder} object-cover shadow mb-1`} />
+                <PlayerIdentity
+                    player={dk}
+                    compact
+                    className="mt-0.5"
+                    numberClassName={`text-[9px] ${accentText}`}
+                    nameClassName={`text-xs font-black ${accentName}`}
+                />
+                <div className={`text-[10px] ${accentText}`}>
+                    {colorScheme === 'amber' ? '大魔王 壹' : '大魔王 贰'}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-0.5">第一轮: {dk.score}</div>
+                {submitted && (
+                    <div className={`text-sm font-black mt-1 ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {dk.scoreDK}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderScoreInput = (dk, scoreInput, setScoreInput, label, inputId, colorScheme) => {
+        if (!dk) return null;
+        const submitted = hasValidScore(dk);
+        const inputBorderL = colorScheme === 'amber' ? 'border-l-amber-600' : 'border-l-rose-600';
+        const inputText = colorScheme === 'amber' ? 'text-amber-300' : 'text-rose-300';
+        const labelColor = colorScheme === 'amber' ? 'text-amber-400' : 'text-rose-400';
+
+        return (
+            <div className="relative flex-1 min-w-0">
+                <span className={`absolute left-1.5 top-1.5 text-[9px] ${labelColor} font-bold leading-none`}>{label}</span>
+                <input
+                    id={inputId}
+                    type="number" step="0.01"
+                    value={submitted ? (scoreInput || dk.scoreDK?.toString() || '') : scoreInput}
+                    onChange={e => setScoreInput(e.target.value)}
+                    disabled={submitted}
+                    className={`w-full bg-slate-800 border border-slate-600 rounded-lg py-1.5 pl-8 pr-1 border-l-4 ${inputBorderL} text-sm font-black text-right ${inputText} focus:outline-none focus:border-teal-500 disabled:opacity-50`}
+                    placeholder="0-100"
+                />
+            </div>
+        );
+    };
 
     return (
         <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl">
@@ -100,103 +182,107 @@ export default function AdminRound3({ gameState, updateState }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* 左侧：大魔王列表 */}
+                {/* 左侧：大魔王状态总览 */}
                 <div className="col-span-2">
-                    <h3 className="text-sm mb-2 text-slate-300 font-bold border-l-4 border-slate-500 pl-2">大魔王选手</h3>
+                    <h3 className="text-sm mb-2 text-slate-300 font-bold border-l-4 border-slate-500 pl-2">大魔王状态</h3>
                     <div className="grid grid-cols-2 gap-2">
-                        {demonKings.map(dk => (
-                            <button
-                                key={dk.id}
-                                onClick={() => handleSelect(dk.id)}
-                                className={`py-3 px-3 rounded-xl transition-all border flex items-center gap-3 ${selectedDKId === dk.id ? 'bg-teal-700/60 text-white shadow-[0_0_12px_rgba(20,184,166,0.4)] border-teal-400 scale-[1.02] backdrop-blur-sm' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 backdrop-blur-sm shadow-inner'}`}
-                            >
-                                <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className="w-12 h-12 rounded-full border border-white/20 object-cover shadow flex-shrink-0" />
-                                <div className="flex flex-col items-start">
-                                    <PlayerIdentity
-                                        player={dk}
-                                        compact
-                                        center={false}
-                                        numberClassName="text-[9px] text-slate-500"
-                                        nameClassName="font-black text-sm"
-                                    />
-                                    <div className="text-xs text-slate-400">第一轮: {dk.score}</div>
-                                    {hasValidScore(dk) && (
-                                        <div className={`text-xs font-bold mt-0.5 ${dk.scoreDK >= averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            大魔王分: {dk.scoreDK} {dk.scoreDK >= averageValue ? '✅守擂成功' : '❌守擂失败'}
-                                        </div>
-                                    )}
+                        {demonKings.map(dk => {
+                            const submitted = hasValidScore(dk);
+                            const passed = submitted && dk.scoreDK >= averageValue;
+                            return (
+                                <div
+                                    key={dk.id}
+                                    className="py-3 px-3 rounded-xl border flex items-center gap-3 bg-white/5 border-white/10 text-slate-300 backdrop-blur-sm shadow-inner"
+                                >
+                                    <img src={getFullAvatarUrl(dk.avatar)} alt={dk.name} className="w-12 h-12 rounded-full border border-white/20 object-cover shadow flex-shrink-0" />
+                                    <div className="flex flex-col items-start flex-1 min-w-0">
+                                        <PlayerIdentity
+                                            player={dk}
+                                            compact
+                                            center={false}
+                                            numberClassName="text-[9px] text-slate-500"
+                                            nameClassName="font-black text-sm"
+                                        />
+                                        <div className="text-xs text-slate-400">第一轮: {dk.score}</div>
+                                        {submitted && (
+                                            <div className={`text-xs font-bold mt-0.5 ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                大魔王分: {dk.scoreDK} {passed ? '✅守擂成功' : '❌守擂失败'}
+                                            </div>
+                                        )}
+                                        {!submitted && (
+                                            <div className="text-xs text-slate-500 mt-0.5">待打分</div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => handleProjectDK(dk.id)}
+                                        className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all flex-shrink-0 ${gameState.activeDemonKingId === dk.id ? 'bg-amber-600 text-white border border-amber-400' : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'}`}
+                                    >
+                                        📺 投屏
+                                    </button>
                                 </div>
-                            </button>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
                 {/* 右侧：打分面板 */}
                 <div className="col-span-1 w-full min-w-0 bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-xl h-fit sticky top-4">
                     <h3 className="text-xs mb-2 text-teal-300 text-center font-bold tracking-widest bg-teal-900/30 py-1 rounded">打分面板</h3>
-                    <div className="mb-2 text-[11px] text-amber-300/80 text-center border border-amber-600/20 bg-amber-900/10 rounded py-1">
-                        选中后请使用顶部「📺 投屏」按钮上屏
-                    </div>
                     <div className="mb-2 text-[11px] text-slate-400 text-center">
                         当前上屏：<span className="text-cyan-300 font-bold">{projectedDK ? getPlayerSingleLine(projectedDK) : '未投屏'}</span>
                     </div>
-                    {selectedDK ? (
-                        <div>
-                            <div className="flex gap-3 items-center mb-3">
-                                <div className="flex flex-col items-center flex-shrink-0 w-16">
-                                    <img src={getFullAvatarUrl(selectedDK.avatar)} alt="avatar" className="w-12 h-12 rounded-full border-2 border-teal-500 object-cover shadow" />
-                                    <PlayerIdentity
-                                        player={selectedDK}
-                                        className="mt-1"
-                                        numberClassName="text-[10px] text-slate-400"
-                                        nameClassName="text-sm text-white"
-                                    />
-                                    {hasValidScore(selectedDK) ? (
-                                        <div className={`text-[10px] font-bold text-center ${selectedDK.scoreDK >= averageValue ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {selectedDK.scoreDK}
-                                        </div>
-                                    ) : (
-                                        <div className="text-[10px] text-slate-500">未打分</div>
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                                    <div className="relative">
-                                        <span className="absolute left-2 top-1.5 text-[10px] text-slate-400 font-bold leading-none">返场<br/>得分</span>
-                                        <input
-                                            type="number" step="0.01"
-                                            value={scoreInput}
-                                            onChange={e => setScoreInput(e.target.value)}
-                                            disabled={selectedSubmitted}
-                                            className="w-full bg-slate-800 border border-slate-600 rounded-lg py-1.5 pl-10 pr-2 border-l-4 border-l-teal-600 text-sm font-black text-right text-teal-300 focus:outline-none focus:border-teal-500 transition-colors disabled:opacity-50"
-                                            placeholder="0-100"
-                                            onKeyDown={e => { if (e.key === 'Enter') handleSubmitScore(); }}
-                                        />
+
+                    {/* 两位大魔王信息并排 */}
+                    <div className="flex gap-2 mb-2">
+                        {renderDkPanel(dk1, score1Input, setScore1Input, 'amber')}
+                        <div className="flex items-center text-slate-500 font-black text-sm">VS</div>
+                        {renderDkPanel(dk2, score2Input, setScore2Input, 'rose')}
+                    </div>
+
+                    {/* 分数输入区 */}
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex gap-1.5">
+                            {renderScoreInput(dk1, score1Input, setScore1Input, '壹号\n得分', 'dk1Score', 'amber')}
+                            {renderScoreInput(dk2, score2Input, setScore2Input, '贰号\n得分', 'dk2Score', 'rose')}
+                        </div>
+
+                        {/* 提交按钮 */}
+                        <button
+                            onClick={handleSubmitBoth}
+                            disabled={dk1Submitted && dk2Submitted}
+                            className="w-full bg-teal-700 hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed border border-teal-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
+                        >确认提交</button>
+
+                        {/* 已提交后的结果 + 操作 */}
+                        {(dk1Submitted || dk2Submitted) && (
+                            <>
+                                {dk1Submitted && (
+                                    <div className={`text-[10px] text-center py-1 rounded border font-bold ${dk1.scoreDK >= averageValue ? 'border-emerald-700 text-emerald-400 bg-emerald-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
+                                        壹号: {dk1.scoreDK >= averageValue ? '✅ 守擂成功（直接晋级）' : '❌ 守擂失败（落入待定）'}
                                     </div>
-                                    {!selectedSubmitted ? (
+                                )}
+                                {dk2Submitted && (
+                                    <div className={`text-[10px] text-center py-1 rounded border font-bold ${dk2.scoreDK >= averageValue ? 'border-emerald-700 text-emerald-400 bg-emerald-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
+                                        贰号: {dk2.scoreDK >= averageValue ? '✅ 守擂成功（直接晋级）' : '❌ 守擂失败（落入待定）'}
+                                    </div>
+                                )}
+                                <div className="flex gap-1.5">
+                                    {dk1Submitted && (
                                         <button
-                                            onClick={handleSubmitScore}
-                                            className="w-full bg-teal-700 hover:bg-teal-600 border border-teal-500 text-white font-bold py-1.5 rounded-lg text-xs tracking-wider transition-all active:scale-[0.98]"
-                                        >确认提交</button>
-                                    ) : (
+                                            onClick={() => handleResetScore(dk1.id)}
+                                            className="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-1.5 rounded-lg text-[10px] transition-all"
+                                        >重置壹号分数</button>
+                                    )}
+                                    {dk2Submitted && (
                                         <button
-                                            onClick={handleResetScore}
-                                            className="w-full bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-1.5 rounded-lg text-xs transition-all"
-                                        >重新打分</button>
+                                            onClick={() => handleResetScore(dk2.id)}
+                                            className="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-1.5 rounded-lg text-[10px] transition-all"
+                                        >重置贰号分数</button>
                                     )}
                                 </div>
-                            </div>
-                            {selectedSubmitted && (
-                                <div className={`text-xs text-center py-1.5 rounded border font-bold ${selectedDK.scoreDK >= averageValue ? 'border-emerald-700 text-emerald-400 bg-emerald-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
-                                    {selectedDK.scoreDK >= averageValue ? '✅ 守擂成功（直接晋级）' : '❌ 守擂失败（落入待定）'}
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="text-slate-500 text-center py-6 flex flex-col items-center border border-dashed border-slate-700 rounded-xl">
-                            <span className="text-2xl mb-2 opacity-30">👈</span>
-                            <p className="text-xs">在左侧选择大魔王</p>
-                        </div>
-                    )}
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

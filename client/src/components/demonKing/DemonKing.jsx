@@ -82,7 +82,7 @@ function DkCard({ dk, targetScore, label }) {
         <motion.div
             animate={cardAnimate}
             transition={{ type: 'spring', stiffness: 160, damping: 20 }}
-            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(354px,44vh,480px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center overflow-hidden"
+            className="w-[clamp(273px,26.4vw,370px)] min-h-[clamp(354px,44vh,480px)] rounded-[24px] border border-white/20 bg-white/10 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] px-[clamp(18px,1.8vw,28px)] py-[clamp(18px,2vh,28px)] flex flex-col items-center justify-center overflow-hidden"
         >
             {/* 角色标签 */}
             <div className="text-[clamp(0.95rem,1.25vw,1.15rem)] font-black tracking-[0.28em] uppercase text-white/68 text-center">
@@ -118,23 +118,16 @@ function DkCard({ dk, targetScore, label }) {
                 </div>
             </div>
 
-            {/* 分数区 */}
-            <div className="mt-[clamp(18px,2vh,28px)] min-h-[clamp(72px,8vh,96px)] flex items-center justify-center w-full text-center">
-                {hasScore ? (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.88, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="text-[clamp(2.3rem,4vw,3.8rem)] leading-none font-mono font-black"
-                    >
-                        <AnimatedScore value={rawScore} targetScore={targetScore} onComplete={handleComplete} />
-                    </motion.div>
-                ) : (
-                    <div className="text-[clamp(2rem,3.4vw,3.4rem)] leading-none font-black font-mono tracking-[0.22em] text-white/42">
-                        ???
-                    </div>
-                )}
-            </div>
+            {hasScore && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.88, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.24, ease: 'easeOut' }}
+                    className="mt-[clamp(18px,2vh,28px)] text-[clamp(2.3rem,4vw,3.8rem)] leading-none font-mono font-black"
+                >
+                    <AnimatedScore value={rawScore} targetScore={targetScore} onComplete={handleComplete} />
+                </motion.div>
+            )}
 
             {/* 结果徽章 */}
             <AnimatePresence>
@@ -165,8 +158,9 @@ export default function DemonKing({ gameState }) {
     const dk2 = demonKings[1] ?? null;
 
     const referencePlayers = sortedPlayers.slice(2, 18);
-    const referenceAverage = referencePlayers.length > 0
-        ? referencePlayers.reduce((sum, p) => sum + Number(p.score || 0), 0) / referencePlayers.length
+    const referencePlayersWithScore = referencePlayers.filter(p => Number.isFinite(Number(p.round2Score)) && Number(p.round2Score) > 0);
+    const referenceAverage = referencePlayersWithScore.length > 0
+        ? referencePlayersWithScore.reduce((sum, p) => sum + Number(p.round2Score), 0) / referencePlayersWithScore.length
         : 0;
     const targetScore = Number.isFinite(Number(gameState?.demonKingAvgScore))
         ? Number(gameState.demonKingAvgScore)
